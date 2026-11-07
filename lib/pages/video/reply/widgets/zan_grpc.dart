@@ -99,13 +99,24 @@ class ZanButtonGrpc extends StatelessWidget {
     final isDislike = action == $fixnum.Int64.TWO;
     final outline = theme.colorScheme.outline;
     final primary = theme.colorScheme.primary;
-    final ButtonStyle style = TextButton.styleFrom(
-      padding: EdgeInsets.zero,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      visualDensity: VisualDensity.compact,
-      // 全局 textButtonTheme 给所有 TextButton 描了 1dp 黑边，这里是要"裸按钮"，
-      // 否则赞/踩各套一个方框，评论区会变成一排小方块。
-      side: BorderSide.none,
+    // 踩、赞、赞数三项要在同一条水平线上。原来两个按钮一个吃 styleFrom 的
+    // minimumSize(40)，一个吃内联 ButtonStyle，内容宽度与内边距不一致，
+    // 加上 Text 默认行高把字形压到盒子偏下，三者视觉上错开。
+    // 统一：零最小尺寸 + 零内边距 + 固定 32 高热区，间距由外层 spacing 控制。
+    const buttonStyle = ButtonStyle(
+      visualDensity: .compact,
+      tapTargetSize: .shrinkWrap,
+      padding: WidgetStatePropertyAll(.zero),
+      minimumSize: WidgetStatePropertyAll(Size.zero),
+      side: WidgetStatePropertyAll(BorderSide.none),
+    );
+    final TextStyle numStyle = TextStyle(
+      color: isLike ? primary : outline,
+      fontSize: theme.textTheme.labelSmall!.fontSize,
+      // height: 1 去掉行高留白，even 让字形在行盒内上下均分，
+      // 这样数字墨迹中心与 16px 图标中心对齐。
+      height: 1,
+      leadingDistribution: TextLeadingDistribution.even,
     );
 
     @pragma('vm:prefer-inline')
@@ -125,17 +136,13 @@ class ZanButtonGrpc extends StatelessWidget {
 
     return Row(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      spacing: 10,
       children: [
         SizedBox(
           height: 32,
           child: TextButton(
-            style: const ButtonStyle(
-              visualDensity: .compact,
-              tapTargetSize: .shrinkWrap,
-              padding: WidgetStatePropertyAll(.zero),
-              minimumSize: WidgetStatePropertyAll(.square(40)),
-              side: WidgetStatePropertyAll(BorderSide.none),
-            ),
+            style: buttonStyle,
             onPressed: isLogin
                 ? () => wrapProcessing(onHateReply)
                 : _toastNotLogin,
@@ -152,12 +159,14 @@ class ZanButtonGrpc extends StatelessWidget {
         SizedBox(
           height: 32,
           child: TextButton(
-            style: style,
+            style: buttonStyle,
             onPressed: isLogin
                 ? () => wrapProcessing(onLikeReply)
                 : _toastNotLogin,
             child: Row(
               spacing: 4,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Icon(
                   isLike
@@ -167,13 +176,7 @@ class ZanButtonGrpc extends StatelessWidget {
                   color: isLike ? primary : outline,
                   semanticLabel: isLike ? '已赞' : '点赞',
                 ),
-                Text(
-                  NumUtils.numFormat(replyItem.like.toInt()),
-                  style: TextStyle(
-                    color: isLike ? primary : outline,
-                    fontSize: theme.textTheme.labelSmall!.fontSize,
-                  ),
-                ),
+                Text(NumUtils.numFormat(replyItem.like.toInt()), style: numStyle),
               ],
             ),
           ),

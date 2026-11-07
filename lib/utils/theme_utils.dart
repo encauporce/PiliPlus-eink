@@ -193,6 +193,9 @@ abstract final class ThemeUtils {
       ),
       popupMenuTheme: PopupMenuThemeData(
         elevation: 0,
+        // M3 默认 popupMenu 底色取 surfaceContainer（浅灰紫），墨水屏上是一块
+        // 脏灰。播放器右上角「更多」菜单、各类下拉菜单统一压成白底。
+        color: isDark ? colorScheme.surfaceContainerHighest : Colors.white,
         surfaceTintColor: isDark ? colorScheme.surfaceContainerHighest : null,
         shape: RoundedRectangleBorder(
           borderRadius: const BorderRadius.all(Radius.circular(8)),

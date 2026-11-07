@@ -182,10 +182,13 @@ class ReplyItemGrpc extends StatelessWidget {
                         maxLines: 1,
                         overflow: .ellipsis,
                         style: TextStyle(
-                          // 墨水屏：大会员粉色名字在黑白屏上淡成浅灰，统一用黑色，
-                          // 会员身份由 LV/卡片挂件体现
-                          color: colorScheme.outline,
+                          // 墨水屏：昵称统一纯黑，大会员身份改用加粗体现，
+                          // 不再依赖服务端下发的粉色
+                          color: colorScheme.onSurface,
                           fontSize: 13,
+                          fontWeight: member.vipStatus.toInt() == 2
+                              ? FontWeight.w700
+                              : null,
                         ),
                       ),
                     ),
@@ -633,7 +636,13 @@ class ReplyItemGrpc extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: childReply.member.name,
-                            style: TextStyle(color: colorScheme.primary),
+                            style: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontWeight:
+                                  childReply.member.vipStatus.toInt() == 2
+                                  ? FontWeight.w700
+                                  : null,
+                            ),
                             recognizer: NoDeadlineTapGestureRecognizer()
                               ..onTap = () {
                                 feedBack();
