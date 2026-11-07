@@ -276,7 +276,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
           boardW = cw * 0.167;
         }
         boardW = boardW.clamp(48.0, 150.0).toDouble();
-        final fontSize = boardW < 90 ? 11.0 : 12.5;
+        final fontSize = boardW < 90 ? 10.5 : 12.0;
         final dbg = '${align.index}|${cw.round()}x${ch.round()}|'
             '${widget.size.width.round()}x${widget.size.height.round()}|'
             '${boardW.round()}';
@@ -317,8 +317,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
                   final item = _board[_board.length - 1 - index];
                   return Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 5,
-                      vertical: 3,
+                      horizontal: 4,
+                      vertical: 2,
                     ),
                     decoration: const BoxDecoration(
                       border: Border(
@@ -334,17 +334,20 @@ class _PlDanmakuState extends State<PlDanmaku> {
                           TextSpan(text: item.content),
                           if (item.dup > 1)
                             TextSpan(
-                              text: '  ×${item.dup}',
+                              text: ' ×${item.dup}',
                               style: TextStyle(
-                                fontSize: fontSize - 2,
+                                fontSize: fontSize - 1.5,
                                 color: const Color(0xFF666666),
                               ),
                             ),
                         ],
                       ),
+                      // 窄栏里长弹幕折两行就够，再多会把整条板撑爆
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontSize: fontSize,
-                        height: 1.2,
+                        height: 1.15,
                         color: Colors.black,
                       ),
                     ),
