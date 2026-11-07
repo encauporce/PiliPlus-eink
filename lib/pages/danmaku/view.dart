@@ -211,9 +211,10 @@ class _PlDanmakuState extends State<PlDanmaku> {
     final fit = playerController.videoFit.value;
     var ar = fit.aspectRatio;
     if (ar == null) {
-      final v = playerController.videoController?.value;
-      final w = v?.width;
-      final h = v?.height;
+      // PlatformVideoController 没有 value，只能从 texture 的 rect 反推分辨率
+      final rect = playerController.videoController?.rect.value;
+      final w = rect?.width;
+      final h = rect?.height;
       if (w != null && h != null && w > 0 && h > 0) ar = w / h;
     }
     if (ar == null) return size.width;
