@@ -112,9 +112,9 @@ class ZanButtonGrpc extends StatelessWidget {
     );
     final TextStyle numStyle = TextStyle(
       color: isLike ? primary : outline,
-      // 以拇指图标左边那块实心"袖口"为基准：16 号图标里袖口实心块高约 8.5dp，
-      // 13 号数字的字面高约 9.2dp，正好上下各比袖口多出一点。
-      fontSize: 13,
+      // 以拇指图标左边那块实心"袖口"为基准：16 号图标里袖口实心块高约 20 设备 px，
+      // 13 号数字刚好 21px（视觉上持平），14 号约 22.6px，上下各比袖口多出一点。
+      fontSize: 14,
       height: 1,
       leadingDistribution: TextLeadingDistribution.even,
     );
@@ -177,10 +177,10 @@ class ZanButtonGrpc extends StatelessWidget {
                   semanticLabel: isLike ? '已赞' : '点赞',
                 ),
                 // 垂直方向认袖口方块而不是整个拇指外形：拇指尖比袖口高出一截，
-                // 按整体居中数字就会浮上去。实机量得袖口中心比数字中心低约 1.7dp，
-                // 把数字下移同样的量，字面上下沿就落在袖口上下沿各自外侧一点。
+                // 按整体居中数字就会浮上去。实机量得 13 号时数字中心比袖口中心低 1.5px，
+                // 这里回填一小格，字面上下沿落在袖口上下沿各自外侧约 1px。
                 Transform.translate(
-                  offset: const Offset(0, 2.7),
+                  offset: const Offset(0, 2.1),
                   child: Text(
                     NumUtils.numFormat(replyItem.like.toInt()),
                     style: numStyle,
