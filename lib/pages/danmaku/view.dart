@@ -9,6 +9,7 @@ import 'package:PiliPlus/plugin/pl_player/controller.dart';
 import 'package:PiliPlus/plugin/pl_player/models/play_status.dart';
 import 'package:PiliPlus/plugin/pl_player/utils/danmaku_options.dart';
 import 'package:PiliPlus/utils/danmaku_utils.dart';
+import 'package:PiliPlus/utils/storage_pref.dart';
 import 'package:canvas_danmaku/canvas_danmaku.dart';
 import 'package:get/get.dart';
 import 'package:material_ui/material_ui.dart';
@@ -52,6 +53,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
   static const int _boardMaxLen = 60;
   Timer? _boardTimer;
   bool _boardAttached = false;
+  String _dbgKey = '';
 
   bool get _boardMode =>
       playerController.videoAlignment.value != VideoAlignmentType.center;
@@ -76,6 +78,12 @@ class _PlDanmakuState extends State<PlDanmaku> {
     playerController
       ..addStatusLister(playerListener)
       ..addPositionListener(videoPositionListen);
+    // 启动时序里控制器偶尔会停在 center（setting 还没被读到），
+    // 以持久化的设置为准补一次，否则「默认画面对齐」选了左右也不生效。
+    final prefAlign = Pref.videoAlignment;
+    if (playerController.videoAlignment.value != prefAlign) {
+      playerController.videoAlignment.value = prefAlign;
+    }
   }
 
   @override
@@ -262,6 +270,15 @@ class _PlDanmakuState extends State<PlDanmaku> {
     final blank = (size.width - _videoWidth(size))
         .clamp(0.0, size.width)
         .toDouble();
+    final dbg = '${align.index}|${blank.toStringAsFixed(0)}';
+    if (dbg != _dbgKey) {
+      _dbgKey = dbg;
+      debugPrint(
+        '[dm-board] size=${size.width.toStringAsFixed(0)}x'
+        '${size.height.toStringAsFixed(0)} blank=${blank.toStringAsFixed(0)} '
+        'align=$align n=${_board.length}',
+      );
+    }
     // 只吃画面剩下的黑边：放不下字就不画（宁可没有，也别压住画面）
     if (blank < 72 || _board.isEmpty) return const SizedBox.shrink();
     final side = const BorderSide(color: Colors.black, width: 1.0);
