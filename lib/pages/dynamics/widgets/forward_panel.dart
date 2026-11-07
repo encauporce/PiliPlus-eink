@@ -48,6 +48,10 @@ Widget forwardPanel(
   }
 
   child = Container(
+    // 引用块原来左右没有留白，横向一直顶到内容区两端：左边框正好压在
+    // 左侧 UP 栏那条 1dp 分界线上，1px + 1px 叠成一条 2px 的黑竖线；
+    // 右边框则贴在屏幕边缘。这里补上和正文、视频卡一致的 12dp 留白。
+    margin: floor == 1 ? const EdgeInsets.symmetric(horizontal: 12) : null,
     padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 8),
     // 墨水屏：原来用 8% 灰底当"引用块"，黑白屏上是一块脏灰，
     // 改成白底 + 1dp 黑框 + 8dp 圆角。

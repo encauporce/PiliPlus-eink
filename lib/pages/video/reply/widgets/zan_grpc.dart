@@ -112,8 +112,9 @@ class ZanButtonGrpc extends StatelessWidget {
     );
     final TextStyle numStyle = TextStyle(
       color: isLike ? primary : outline,
-      // 11 太弱，和 16 的图标放一起像附注；提到 12 才是一个整体的两块
-      fontSize: 12,
+      // 以拇指图标左边那块实心"袖口"为基准：16 号图标里袖口实心块高约 8.5dp，
+      // 13 号数字的字面高约 9.2dp，正好上下各比袖口多出一点。
+      fontSize: 13,
       height: 1,
       leadingDistribution: TextLeadingDistribution.even,
     );
@@ -175,11 +176,11 @@ class ZanButtonGrpc extends StatelessWidget {
                   color: isLike ? primary : outline,
                   semanticLabel: isLike ? '已赞' : '点赞',
                 ),
-                // 不追求几何中心重合：小字号数字的字面重心偏高，
-                // 硬对中线会显得数字浮在图标的肩上。让它略微下沉，
-                // 底边与拇指图标底边接近，读起来才是"一条线"。
+                // 垂直方向认袖口方块而不是整个拇指外形：拇指尖比袖口高出一截，
+                // 按整体居中数字就会浮上去。实机量得袖口中心比数字中心低约 1.7dp，
+                // 把数字下移同样的量，字面上下沿就落在袖口上下沿各自外侧一点。
                 Transform.translate(
-                  offset: const Offset(0, 1),
+                  offset: const Offset(0, 2.7),
                   child: Text(
                     NumUtils.numFormat(replyItem.like.toInt()),
                     style: numStyle,
