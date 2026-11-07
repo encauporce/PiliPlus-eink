@@ -146,13 +146,20 @@ class ZanButtonGrpc extends StatelessWidget {
             onPressed: isLogin
                 ? () => wrapProcessing(onHateReply)
                 : _toastNotLogin,
-            child: Icon(
-              isDislike
-                  ? FontAwesomeIcons.solidThumbsDown
-                  : FontAwesomeIcons.thumbsDown,
-              size: 16,
-              color: isDislike ? primary : outline,
-              semanticLabel: isDislike ? '已踩' : '点踩',
+            // thumbsDown 是 thumbsUp 的上下镜像，字形框一样高，但左侧实心
+            // "袖口"被翻到了上半部分：实测踩袖口 y 1032-1052、赞袖口 y 1038-1059，
+            // 相差 6.5px（dpr 2.25 → 2.9dp）。这里把踩整体下移，让两块实心
+            // 对齐成一条线，拇指各自朝上/朝下，视觉上才是一组。
+            child: Transform.translate(
+              offset: const Offset(0, 2.9),
+              child: Icon(
+                isDislike
+                    ? FontAwesomeIcons.solidThumbsDown
+                    : FontAwesomeIcons.thumbsDown,
+                size: 16,
+                color: isDislike ? primary : outline,
+                semanticLabel: isDislike ? '已踩' : '点踩',
+              ),
             ),
           ),
         ),
