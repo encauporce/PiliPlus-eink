@@ -464,8 +464,9 @@ class _RenderVideoTime extends RenderBox {
     markNeedsSemanticsUpdate();
   }
 
-  static const _positionColor = Colors.white;
-  static const _durationColor = Color(0xFFD0D0D0);
+  // 墨水屏：底部控制栏改白底，时间文字改黑 / 深灰
+  static const _positionColor = Colors.black;
+  static const _durationColor = Color(0xFF666666);
 
   ui.Paragraph? _cache;
 

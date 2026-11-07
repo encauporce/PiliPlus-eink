@@ -99,9 +99,9 @@ class ZanButtonGrpc extends StatelessWidget {
     final isDislike = action == $fixnum.Int64.TWO;
     final outline = theme.colorScheme.outline;
     final primary = theme.colorScheme.primary;
-    // 踩、赞、赞数三项要在同一条水平线上。原来两个按钮一个吃 styleFrom 的
+    // 踩、赞、赞数三项要看起来像一组。原来两个按钮一个吃 styleFrom 的
     // minimumSize(40)，一个吃内联 ButtonStyle，内容宽度与内边距不一致，
-    // 加上 Text 默认行高把字形压到盒子偏下，三者视觉上错开。
+    // 所以三项在水平方向上被拉开得乱。
     // 统一：零最小尺寸 + 零内边距 + 固定 32 高热区，间距由外层 spacing 控制。
     const buttonStyle = ButtonStyle(
       visualDensity: .compact,
@@ -112,9 +112,8 @@ class ZanButtonGrpc extends StatelessWidget {
     );
     final TextStyle numStyle = TextStyle(
       color: isLike ? primary : outline,
-      fontSize: theme.textTheme.labelSmall!.fontSize,
-      // height: 1 去掉行高留白，even 让字形在行盒内上下均分，
-      // 这样数字墨迹中心与 16px 图标中心对齐。
+      // 11 太弱，和 16 的图标放一起像附注；提到 12 才是一个整体的两块
+      fontSize: 12,
       height: 1,
       leadingDistribution: TextLeadingDistribution.even,
     );
@@ -176,10 +175,11 @@ class ZanButtonGrpc extends StatelessWidget {
                   color: isLike ? primary : outline,
                   semanticLabel: isLike ? '已赞' : '点赞',
                 ),
-                // FontAwesome 的拇指字形在 em 盒里偏上约 1dp，
-                // 数字上提 1dp 让两者墨迹中心重合（只影响绘制，不动布局/热区）
+                // 不追求几何中心重合：小字号数字的字面重心偏高，
+                // 硬对中线会显得数字浮在图标的肩上。让它略微下沉，
+                // 底边与拇指图标底边接近，读起来才是"一条线"。
                 Transform.translate(
-                  offset: const Offset(0, -1),
+                  offset: const Offset(0, 1),
                   child: Text(
                     NumUtils.numFormat(replyItem.like.toInt()),
                     style: numStyle,

@@ -60,7 +60,8 @@ class PlayOrPauseButtonState extends State<PlayOrPauseButton>
             semanticLabel: player.state.playing ? '暂停' : '播放',
             progress: controller,
             icon: AnimatedIcons.play_pause,
-            color: Colors.white,
+            // 墨水屏：底部控制栏改白底，图标随之改黑
+            color: Colors.black,
             size: 20,
           ),
         ),

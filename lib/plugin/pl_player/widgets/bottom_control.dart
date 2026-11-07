@@ -71,84 +71,87 @@ class BottomControl extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.of(context);
-    final primary = Colors.white;
+    final primary = Colors.black;
     final thumbGlowColor = Colors.transparent;
-    final bufferedBarColor = const Color(0xFF888888);
-    final baseBarColor = const Color(0xFF444444);
+    final bufferedBarColor = const Color(0xFF999999);
+    final baseBarColor = const Color(0xFFCCCCCC);
 
     final enableHover =
         PlatformUtils.isDesktop &&
         controller.showSeekPreview &&
         !controller.isFileSource;
 
-    return Padding(
-      padding: const .symmetric(horizontal: 10, vertical: 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 10, 7),
-            child: Obx(
-              () => Offstage(
-                offstage: !controller.showControls.value,
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.bottomCenter,
-                  children: [
-                    Obx(
-                      () => ProgressBar(
-                        progress: controller.progress,
-                        buffered: controller.buffered.value,
-                        total: controller.duration.value,
-                        progressBarColor: primary,
-                        baseBarColor: baseBarColor,
-                        bufferedBarColor: bufferedBarColor,
-                        thumbColor: primary,
-                        thumbGlowColor: thumbGlowColor,
-                        barHeight: 3.5,
-                        thumbRadius: 7,
-                        thumbGlowRadius: 25,
-                        onDragStart: onDragStart,
-                        onDragUpdate: onDragUpdate,
-                        onSeek: onSeek,
-                        onHover: enableHover ? _onHover : null,
-                        onExit: enableHover ? _onExit : null,
-                      ),
-                    ),
-                    if (controller.enableBlock &&
-                        videoDetailController.segmentProgressList.isNotEmpty)
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 5.25,
-                        child: SegmentProgressBar(
-                          segments: videoDetailController.segmentProgressList,
+    return ColoredBox(
+      color: Colors.white,
+      child: Padding(
+        padding: const .symmetric(horizontal: 10, vertical: 12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 10, 7),
+              child: Obx(
+                () => Offstage(
+                  offstage: !controller.showControls.value,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.bottomCenter,
+                    children: [
+                      Obx(
+                        () => ProgressBar(
+                          progress: controller.progress,
+                          buffered: controller.buffered.value,
+                          total: controller.duration.value,
+                          progressBarColor: primary,
+                          baseBarColor: baseBarColor,
+                          bufferedBarColor: bufferedBarColor,
+                          thumbColor: primary,
+                          thumbGlowColor: thumbGlowColor,
+                          barHeight: 3.5,
+                          thumbRadius: 7,
+                          thumbGlowRadius: 25,
+                          onDragStart: onDragStart,
+                          onDragUpdate: onDragUpdate,
+                          onSeek: onSeek,
+                          onHover: enableHover ? _onHover : null,
+                          onExit: enableHover ? _onExit : null,
                         ),
                       ),
-                    if (controller.showViewPoints &&
-                        videoDetailController.viewPointList.isNotEmpty &&
-                        videoDetailController.showVP.value)
-                      Padding(
-                        padding: const .only(bottom: 8.75),
-                        child: ViewPointSegmentProgressBar(
-                          segments: videoDetailController.viewPointList,
-                          onSeek: PlatformUtils.isDesktop
-                              ? (position) =>
-                                    controller.seekTo(position, isSeek: false)
-                              : null,
+                      if (controller.enableBlock &&
+                          videoDetailController.segmentProgressList.isNotEmpty)
+                        Positioned(
+                          left: 0,
+                          right: 0,
+                          bottom: 5.25,
+                          child: SegmentProgressBar(
+                            segments: videoDetailController.segmentProgressList,
+                          ),
                         ),
-                      ),
-                    if (videoDetailController.showDmTrendChart.value)
-                      if (videoDetailController.dmTrend.value?.dataOrNull
-                          case final list?)
-                        buildDmChart(primary, list, videoDetailController, 4.5),
-                  ],
+                      if (controller.showViewPoints &&
+                          videoDetailController.viewPointList.isNotEmpty &&
+                          videoDetailController.showVP.value)
+                        Padding(
+                          padding: const .only(bottom: 8.75),
+                          child: ViewPointSegmentProgressBar(
+                            segments: videoDetailController.viewPointList,
+                            onSeek: PlatformUtils.isDesktop
+                                ? (position) =>
+                                      controller.seekTo(position, isSeek: false)
+                                : null,
+                          ),
+                        ),
+                      if (videoDetailController.showDmTrendChart.value)
+                        if (videoDetailController.dmTrend.value?.dataOrNull
+                            case final list?)
+                          buildDmChart(primary, list, videoDetailController, 4.5),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          buildBottomControl(),
-        ],
+            buildBottomControl(),
+          ],
+        ),
       ),
     );
   }

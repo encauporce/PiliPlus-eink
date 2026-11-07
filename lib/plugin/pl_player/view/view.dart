@@ -426,7 +426,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         icon: const Icon(
           Icons.skip_previous,
           size: 22,
-          color: Colors.white,
+          color: Colors.black,
         ),
         onTap: () {
           if (!introController.prevPlay()) {
@@ -443,7 +443,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         icon: const Icon(
           Icons.skip_next,
           size: 22,
-          color: Colors.white,
+          color: Colors.black,
         ),
         onTap: () {
           if (!introController.nextPlay()) {
@@ -479,7 +479,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 child: const Icon(
                   Icons.show_chart,
                   size: 22,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
               onTap: () => videoDetailController.showDmTrendChart.value = !show,
@@ -497,10 +497,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             tooltip: '墨水屏网点',
             requestFocus: false,
             initialValue: type,
-            color: Colors.black,
+            color: Colors.white,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-              side: BorderSide(color: Colors.white, width: 1.0),
+              side: BorderSide(color: Colors.black, width: 1.0),
             ),
             itemBuilder: (context) {
               return SuperResolutionType.values
@@ -513,7 +513,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       child: Text(
                         type.label,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 13,
                         ),
                       ),
@@ -525,7 +525,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 type.label,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
+                style: const TextStyle(color: Colors.black, fontSize: 13),
               ),
             ),
           );
@@ -545,7 +545,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 child: const Icon(
                   CustomIcons.view_headline_rotate_90,
                   size: 22,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
               onTap: widget.showViewPoints,
@@ -570,7 +570,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         icon: const Icon(
           Icons.list,
           size: 22,
-          color: Colors.white,
+          color: Colors.black,
         ),
         onTap: () {
           if (videoDetailController.isFileSource) {
@@ -600,10 +600,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             tooltip: '画面比例',
             requestFocus: false,
             initialValue: fit,
-            color: Colors.black,
+            color: Colors.white,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-              side: BorderSide(color: Colors.white, width: 1.0),
+              side: BorderSide(color: Colors.black, width: 1.0),
             ),
             itemBuilder: (context) {
               return VideoFitType.values
@@ -616,7 +616,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       child: Text(
                         boxFit.desc,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 13,
                         ),
                       ),
@@ -628,7 +628,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 fit.desc,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
+                style: const TextStyle(color: Colors.black, fontSize: 13),
               ),
             ),
           );
@@ -643,10 +643,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             tooltip: '画面对齐',
             requestFocus: false,
             initialValue: align,
-            color: Colors.black,
+            color: Colors.white,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-              side: BorderSide(color: Colors.white, width: 1.0),
+              side: BorderSide(color: Colors.black, width: 1.0),
             ),
             itemBuilder: (context) {
               return VideoAlignmentType.values
@@ -659,7 +659,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                       child: Text(
                         alignment.label,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 13,
                         ),
                       ),
@@ -671,7 +671,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 align.label,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
+                style: const TextStyle(color: Colors.black, fontSize: 13),
               ),
             ),
           );
@@ -687,10 +687,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               requestFocus: false,
               initialValue: videoDetailController.currLang.value,
               onSelected: videoDetailController.setLanguage,
-              color: Colors.black,
+              color: Colors.white,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
-                side: BorderSide(color: Colors.white, width: 1.0),
+                side: BorderSide(color: Colors.black, width: 1.0),
               ),
               itemBuilder: (context) => [
                 const PopupMenuItem<String>(
@@ -698,7 +698,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                   value: '',
                   child: Text(
                     "关闭翻译",
-                    style: TextStyle(color: Colors.white, fontSize: 13),
+                    style: TextStyle(color: Colors.black, fontSize: 13),
                   ),
                 ),
                 ...list.map(
@@ -707,7 +707,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     value: e.lang,
                     child: Text(
                       e.title!,
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: Colors.black, fontSize: 13),
                     ),
                   ),
                 ),
@@ -718,7 +718,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                 child: const Icon(
                   Icons.translate,
                   size: 18,
-                  color: Colors.white,
+                  color: Colors.black,
                 ),
               ),
             );
@@ -736,10 +736,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               tooltip: '字幕',
               requestFocus: false,
               initialValue: val,
-              color: Colors.black,
+              color: Colors.white,
               shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8)),
-                side: BorderSide(color: Colors.white, width: 1.0),
+                side: BorderSide(color: Colors.black, width: 1.0),
               ),
               itemBuilder: (context) {
                 return [
@@ -750,7 +750,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     child: const Text(
                       "关闭字幕",
                       style: TextStyle(
-                        color: Colors.white,
+                        color: Colors.black,
                         fontSize: 13,
                       ),
                     ),
@@ -764,7 +764,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                         e.lanDoc ?? e.lan,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const .new(color: Colors.white, fontSize: 13),
+                        style: const .new(color: Colors.black, fontSize: 13),
                       ),
                     );
                   }),
@@ -777,12 +777,12 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     ? const Icon(
                         Icons.closed_caption_off_outlined,
                         size: 22,
-                        color: Colors.white,
+                        color: Colors.black,
                       )
                     : const Icon(
                         Icons.closed_caption_off_rounded,
                         size: 22,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
               ),
             );
@@ -797,10 +797,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
           tooltip: '倍速',
           requestFocus: false,
           initialValue: plPlayerController.playbackSpeed,
-          color: Colors.black,
+          color: Colors.white,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(8)),
-            side: BorderSide(color: Colors.white, width: 1.0),
+            side: BorderSide(color: Colors.black, width: 1.0),
           ),
           itemBuilder: (context) {
             return plPlayerController.speedList
@@ -812,7 +812,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     onTap: () => plPlayerController.setPlaybackSpeed(speed),
                     child: Text(
                       "${speed}X",
-                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                      style: const TextStyle(color: Colors.black, fontSize: 13),
                       semanticsLabel: "$speed倍速",
                     ),
                   ),
@@ -823,7 +823,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Text(
               "${plPlayerController.playbackSpeed}X",
-              style: const TextStyle(color: Colors.white, fontSize: 13),
+              style: const TextStyle(color: Colors.black, fontSize: 13),
               semanticsLabel: "${plPlayerController.playbackSpeed}倍速",
             ),
           ),
@@ -847,10 +847,10 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
             tooltip: '画质',
             requestFocus: false,
             initialValue: currentVideoQa.code,
-            color: Colors.black,
+            color: Colors.white,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(8)),
-              side: BorderSide(color: Colors.white, width: 1.0),
+              side: BorderSide(color: Colors.black, width: 1.0),
             ),
             itemBuilder: (context) {
               return List.generate(
@@ -889,9 +889,9 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
                     child: Text(
                       item.newDesc ?? item.quality.toString(),
                       style: enabled
-                          ? const TextStyle(color: Colors.white, fontSize: 13)
+                          ? const TextStyle(color: Colors.black, fontSize: 13)
                           : const TextStyle(
-                              color: Color(0x62FFFFFF),
+                              color: Color(0x62000000),
                               fontSize: 13,
                             ),
                     ),
@@ -903,7 +903,7 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Text(
                 currentVideoQa.shortDesc,
-                style: const TextStyle(color: Colors.white, fontSize: 13),
+                style: const TextStyle(color: Colors.black, fontSize: 13),
               ),
             ),
           );
@@ -916,8 +916,8 @@ class _PLVideoPlayerState extends State<PLVideoPlayer>
         height: 30,
         tooltip: isFullScreen ? '退出全屏' : '全屏',
         icon: isFullScreen
-            ? const Icon(Icons.fullscreen_exit, size: 24, color: Colors.white)
-            : const Icon(Icons.fullscreen, size: 24, color: Colors.white),
+            ? const Icon(Icons.fullscreen_exit, size: 24, color: Colors.black)
+            : const Icon(Icons.fullscreen, size: 24, color: Colors.black),
         onTap: () =>
             plPlayerController.triggerFullScreen(status: !isFullScreen),
         onSecondaryTap: () => plPlayerController.triggerFullScreen(
