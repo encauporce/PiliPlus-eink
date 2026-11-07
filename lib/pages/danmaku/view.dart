@@ -239,22 +239,31 @@ class _PlDanmakuState extends State<PlDanmaku> {
     });
   }
 
-  /// 画面在当前容器里实际占多宽。左右对齐时另一侧空出来的黑边正好放留言板。
-  double _videoWidth(Size size) {
+  /// 视频真实宽高比。优先用解码出来的分辨率（surface 的 rect 可能已经被撑成
+  /// 容器尺寸，反推出来的比例是容器比例，不能用）。
+  double? _videoAspect() {
     final fit = playerController.videoFit.value;
-    var ar = fit.aspectRatio;
-    if (ar == null) {
-      // PlatformVideoController 没有 value，只能从 texture 的 rect 反推分辨率
-      final rect = playerController.videoController?.rect.value;
-      final w = rect?.width;
-      final h = rect?.height;
-      if (w != null && h != null && w > 0 && h > 0) ar = w / h;
+    if (fit.aspectRatio != null) return fit.aspectRatio;
+    final state = playerController.videoPlayerController?.state;
+    final vw = state?.width ?? 0;
+    final vh = state?.height ?? 0;
+    if (vw > 0 && vh > 0) return vw / vh;
+    final rect = playerController.videoController?.rect.value;
+    if (rect != null && rect.width > 0 && rect.height > 0) {
+      return rect.width / rect.height;
     }
+    return null;
+  }
+
+  /// 画面在给定容器里实际占多宽（按当前 fit 等比铺开）。
+  double _videoWidth(Size size) {
+    final ar = _videoAspect();
     if (ar == null) return size.width;
-    switch (fit.boxFit) {
+    switch (playerController.videoFit.value.boxFit) {
       case BoxFit.fill:
       case BoxFit.cover:
       case BoxFit.fitWidth:
+      case BoxFit.none:
         return size.width;
       default:
         final w = size.height * ar;
@@ -262,78 +271,113 @@ class _PlDanmakuState extends State<PlDanmaku> {
     }
   }
 
+  /// surface 是否已经被撑成整个容器。撑满时 FittedBox 的 alignment 没有可挪
+  /// 的空间，画面实际还在中间（黑边是 surface 内部做的），板只能占单侧一半。
+  bool _surfaceFillsBox(Size box) {
+    final rect = playerController.videoController?.rect.value;
+    if (rect == null ||
+        rect.width <= 0 ||
+        rect.height <= 0 ||
+        box.width <= 0 ||
+        box.height <= 0) {
+      return false;
+    }
+    return ((rect.width / rect.height) - (box.width / box.height)).abs() < 0.02;
+  }
+
   Widget _buildBoard() {
-    final size = widget.size;
     final align = playerController.videoAlignment.value;
     // align == left 表示画面贴左，板落到右边，反之亦然
     final boardOnRight = align == VideoAlignmentType.left;
-    final blank = (size.width - _videoWidth(size))
-        .clamp(0.0, size.width)
-        .toDouble();
-    final dbg = '${align.index}|${blank.toStringAsFixed(0)}';
-    if (dbg != _dbgKey) {
-      _dbgKey = dbg;
-      debugPrint(
-        '[dm-board] size=${size.width.toStringAsFixed(0)}x'
-        '${size.height.toStringAsFixed(0)} blank=${blank.toStringAsFixed(0)} '
-        'align=$align n=${_board.length}',
-      );
-    }
-    // 只吃画面剩下的黑边：放不下字就不画（宁可没有，也别压住画面）
-    if (blank < 72 || _board.isEmpty) return const SizedBox.shrink();
-    final side = const BorderSide(color: Colors.black, width: 1.0);
-    return Align(
-      alignment: boardOnRight ? Alignment.centerRight : Alignment.centerLeft,
-      child: SizedBox(
-        width: blank,
-        height: size.height,
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border(
-              left: boardOnRight ? side : BorderSide.none,
-              right: boardOnRight ? BorderSide.none : side,
+    return LayoutBuilder(
+      builder: (context, c) {
+        // 用父级真实约束，widget.size 在部分布局路径上跟实际显示区不一致
+        final cw = c.maxWidth.isFinite ? c.maxWidth : widget.size.width;
+        final ch = c.maxHeight.isFinite ? c.maxHeight : widget.size.height;
+        final box = Size(cw, ch);
+        final blank = (cw - _videoWidth(box)).clamp(0.0, cw).toDouble();
+        // 画面确实贴边时，空白全在另一侧；若对齐没把画面挪过去（居中），
+        // 两侧各占一半。两种情况下板都只吃真正空出来的那一块，不压画面。
+        final surfaceFills = _surfaceFillsBox(box);
+        final boardW = (align == VideoAlignmentType.center || surfaceFills)
+            ? blank / 2
+            : blank;
+        final fontSize = boardW < 170 ? 11.0 : 13.0;
+        final dbg =
+            '${align.index}|${blank.round()}|${cw.round()}x${ch.round()}|'
+            '${surfaceFills ? 1 : 0}';
+        if (dbg != _dbgKey) {
+          _dbgKey = dbg;
+          debugPrint(
+            '[dm-board] align=$align container=${cw.round()}x${ch.round()} '
+            'videoW=${_videoWidth(box).round()} blank=${blank.round()} '
+            'boardW=${boardW.round()} n=${_board.length}',
+          );
+        }
+        // 只吃画面剩下的黑边：放不下字就不画（宁可没有，也别压住画面）
+        if (boardW < 64 || _board.isEmpty) return const SizedBox.shrink();
+        final side = const BorderSide(color: Colors.black, width: 1.0);
+        return Align(
+          alignment:
+              boardOnRight ? Alignment.centerRight : Alignment.centerLeft,
+          child: SizedBox(
+            width: boardW,
+            height: ch,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  left: boardOnRight ? side : BorderSide.none,
+                  right: boardOnRight ? BorderSide.none : side,
+                ),
+              ),
+              child: ListView.builder(
+                // 倒序：新留言永远贴着底部进来，像直播间那样往上顶
+                reverse: true,
+                padding: EdgeInsets.zero,
+                itemCount: _board.length,
+                itemBuilder: (_, index) {
+                  final item = _board[_board.length - 1 - index];
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 5,
+                      vertical: 3,
+                    ),
+                    decoration: const BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Color(0xFFCCCCCC),
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                    child: Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(text: item.content),
+                          if (item.dup > 1)
+                            TextSpan(
+                              text: '  ×${item.dup}',
+                              style: TextStyle(
+                                fontSize: fontSize - 2,
+                                color: const Color(0xFF666666),
+                              ),
+                            ),
+                        ],
+                      ),
+                      style: TextStyle(
+                        fontSize: fontSize,
+                        height: 1.2,
+                        color: Colors.black,
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
-          child: ListView.builder(
-            // 倒序：新留言永远贴着底部进来，像直播间那样往上顶
-            reverse: true,
-            padding: EdgeInsets.zero,
-            itemCount: _board.length,
-            itemBuilder: (_, index) {
-              final item = _board[_board.length - 1 - index];
-              return Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFCCCCCC), width: 1.0),
-                  ),
-                ),
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(text: item.content),
-                      if (item.dup > 1)
-                        TextSpan(
-                          text: '  ×${item.dup}',
-                          style: const TextStyle(
-                            fontSize: 10,
-                            color: Color(0xFF666666),
-                          ),
-                        ),
-                    ],
-                  ),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    height: 1.2,
-                    color: Colors.black,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
+        );
+      },
     );
   }
 
