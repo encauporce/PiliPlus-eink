@@ -511,49 +511,62 @@ class ReplyItemGrpc extends StatelessWidget {
     return Row(
       children: [
         const SizedBox(width: 36),
-        SizedBox(
-          height: 32,
-          child: TextButton(
-            style: buttonStyle,
-            onPressed: () {
-              feedBack();
-              onReply?.call(replyItem);
-            },
-            child: Row(
-              spacing: 3,
-              mainAxisSize: .min,
-              children: [
-                Icon(
-                  Icons.reply,
-                  size: 18,
-                  color: colorScheme.outline,
+        // 12 号汉字的墨迹在字框内偏上（实测「回复」y 1033-1057，中心 1045），
+        // 而右边赞数字（14 号）中心在 1049.5，两者差 4.5px，视觉上「回复」浮在上面。
+        // 把左侧这组文字整体下移 2dp（= 4.5px），和赞踩那条轴线对齐。
+        Transform.translate(
+          offset: const Offset(0, 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                height: 32,
+                child: TextButton(
+                  style: buttonStyle,
+                  onPressed: () {
+                    feedBack();
+                    onReply?.call(replyItem);
+                  },
+                  child: Row(
+                    spacing: 3,
+                    mainAxisSize: .min,
+                    children: [
+                      Icon(
+                        Icons.reply,
+                        size: 18,
+                        color: colorScheme.outline,
+                      ),
+                      Text('回复', style: textStyle),
+                    ],
+                  ),
                 ),
-                Text('回复', style: textStyle),
+              ),
+              const SizedBox(width: 2),
+              if (replyControl.translationSwitch ==
+                  .TRANSLATION_SWITCH_SHOW_TRANSLATION) ...[
+                _buildTranslateBtn(
+                  context,
+                  colorScheme,
+                  replyControl,
+                  textStyle,
+                  buttonStyle,
+                ),
+                const SizedBox(width: 2),
+              ] else if (replyControl.cardLabels.isNotEmpty) ...[
+                Text(
+                  dialogBtn != null
+                      ? replyControl.cardLabels.first.textContent
+                      : replyControl.cardLabels
+                            .map((e) => e.textContent)
+                            .join('  '),
+                  style: textStyle.copyWith(color: colorScheme.secondary),
+                ),
+                const SizedBox(width: 2),
               ],
-            ),
+              ?dialogBtn,
+            ],
           ),
         ),
-        const SizedBox(width: 2),
-        if (replyControl.translationSwitch ==
-            .TRANSLATION_SWITCH_SHOW_TRANSLATION) ...[
-          _buildTranslateBtn(
-            context,
-            colorScheme,
-            replyControl,
-            textStyle,
-            buttonStyle,
-          ),
-          const SizedBox(width: 2),
-        ] else if (replyControl.cardLabels.isNotEmpty) ...[
-          Text(
-            dialogBtn != null
-                ? replyControl.cardLabels.first.textContent
-                : replyControl.cardLabels.map((e) => e.textContent).join('  '),
-            style: textStyle.copyWith(color: colorScheme.secondary),
-          ),
-          const SizedBox(width: 2),
-        ],
-        ?dialogBtn,
         const Spacer(),
         ZanButtonGrpc(replyItem: replyItem),
         const SizedBox(width: 5),
