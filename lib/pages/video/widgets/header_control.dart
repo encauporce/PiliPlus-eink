@@ -156,7 +156,7 @@ mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
               return Text(
                 '$batteryLevel%',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 13,
                 ),
               );
@@ -168,7 +168,7 @@ mixin TimeBatteryMixin<T extends StatefulWidget> on State<T> {
           () => Text(
             now.value,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black,
               fontSize: 13,
             ),
           ),
@@ -1723,7 +1723,7 @@ class HeaderControlState extends State<HeaderControl>
               spacing: 30,
               velocity: 30,
               strutStyle: const StrutStyle(fontSize: 16, leading: 0),
-              style: const TextStyle(color: Colors.white, fontSize: 16),
+              style: const TextStyle(color: Colors.black, fontSize: 16),
               provider: effectiveProvider,
             );
           },
@@ -1739,7 +1739,7 @@ class HeaderControlState extends State<HeaderControl>
               () => Text(
                 '${introController.total.value}人正在看',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontSize: 11,
                 ),
               ),
@@ -1767,7 +1767,7 @@ class HeaderControlState extends State<HeaderControl>
                     icon: const Icon(
                       FontAwesomeIcons.arrowLeft,
                       size: 15,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     onPressed: () =>
                         plPlayerController.onPopInvokedWithResult(false, null),
@@ -1784,7 +1784,7 @@ class HeaderControlState extends State<HeaderControl>
                       icon: const Icon(
                         FontAwesomeIcons.house,
                         size: 15,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                       onPressed: plPlayerController.onCloseAll,
                     ),
@@ -1812,12 +1812,12 @@ class HeaderControlState extends State<HeaderControl>
                             ? const Icon(
                                 size: 19,
                                 Icons.push_pin,
-                                color: Colors.white,
+                                color: Colors.black,
                               )
                             : const Icon(
                                 size: 19,
                                 Icons.push_pin_outlined,
-                                color: Colors.white,
+                                color: Colors.black,
                               ),
                       ),
                     );
@@ -1835,7 +1835,7 @@ class HeaderControlState extends State<HeaderControl>
                           icon: const Icon(
                             Icons.headphones_outlined,
                             size: 19,
-                            color: Colors.white,
+                            color: Colors.black,
                           ),
                         ),
                       ),
@@ -1849,7 +1849,7 @@ class HeaderControlState extends State<HeaderControl>
                         icon: const Icon(
                           Icons.cast,
                           size: 19,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -1865,7 +1865,7 @@ class HeaderControlState extends State<HeaderControl>
                         icon: const Icon(
                           CustomIcons.shield_play_arrow,
                           size: 20,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -1883,7 +1883,7 @@ class HeaderControlState extends State<HeaderControl>
                               icon: const Icon(
                                 MdiIcons.advertisements,
                                 size: 19,
-                                color: Colors.white,
+                                color: Colors.black,
                               ),
                             ),
                           )
@@ -1900,7 +1900,7 @@ class HeaderControlState extends State<HeaderControl>
                       icon: const Icon(
                         Icons.comment_outlined,
                         size: 19,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -1928,12 +1928,12 @@ class HeaderControlState extends State<HeaderControl>
                               ? const Icon(
                                   size: 20,
                                   CustomIcons.dm_on,
-                                  color: Colors.white,
+                                  color: Colors.black,
                                 )
                               : const Icon(
                                   size: 20,
                                   CustomIcons.dm_off,
-                                  color: Colors.white,
+                                  color: Colors.black,
                                 ),
                         );
                       },
@@ -1950,7 +1950,7 @@ class HeaderControlState extends State<HeaderControl>
                     icon: const Icon(
                       size: 20,
                       CustomIcons.dm_settings,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -1973,7 +1973,7 @@ class HeaderControlState extends State<HeaderControl>
                       icon: const Icon(
                         Icons.picture_in_picture_outlined,
                         size: 19,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -1987,7 +1987,7 @@ class HeaderControlState extends State<HeaderControl>
                     icon: const Icon(
                       Icons.more_vert_outlined,
                       size: 19,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -2008,7 +2008,7 @@ class HeaderControlState extends State<HeaderControl>
                       expand: false,
                       icon: const Icon(
                         FontAwesomeIcons.thumbsUp,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                       selectIcon: const Icon(FontAwesomeIcons.solidThumbsUp),
                       selectStatus: introController.hasLike.value,
@@ -2036,7 +2036,7 @@ class HeaderControlState extends State<HeaderControl>
                       animation: introController.tripleAnimation,
                       icon: const Icon(
                         FontAwesomeIcons.b,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                       selectIcon: const Icon(FontAwesomeIcons.b),
                       onTap: introController.actionCoinVideo,
@@ -2054,7 +2054,7 @@ class HeaderControlState extends State<HeaderControl>
                       animation: introController.tripleAnimation,
                       icon: const Icon(
                         FontAwesomeIcons.star,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                       selectIcon: const Icon(FontAwesomeIcons.solidStar),
                       onTap: () => introController.showFavBottomSheet(context),
@@ -2072,7 +2072,7 @@ class HeaderControlState extends State<HeaderControl>
                   height: btnHeight,
                   child: ActionItem(
                     expand: false,
-                    icon: const Icon(CustomIcons.download, color: Colors.white),
+                    icon: const Icon(CustomIcons.download, color: Colors.black),
                     onTap: () => videoDetailCtr.onDownload(context),
                     text: '缓存',
                     semanticsLabel: '缓存',
@@ -2085,7 +2085,7 @@ class HeaderControlState extends State<HeaderControl>
                     expand: false,
                     icon: const Icon(
                       FontAwesomeIcons.shareFromSquare,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     onTap: () => introController.actionShareVideo(context),
                     semanticsLabel: '分享',

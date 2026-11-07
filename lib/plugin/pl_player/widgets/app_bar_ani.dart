@@ -22,10 +22,12 @@ class AppBarAni extends StatelessWidget {
     end: Offset.zero,
   );
 
+  // 墨水屏：控制条原为黑底 + 白图标，和页面的黑白版式冲突；
+  // 改白底 + 黑描边 + 黑图标，暂停时上下两条控制条都嵌在白纸里。
   static const _topDecoration = BoxDecoration(
-    color: Colors.black,
+    color: Colors.white,
     border: Border(
-      bottom: BorderSide(color: Colors.white, width: 1.0),
+      bottom: BorderSide(color: Colors.black, width: 1.0),
     ),
   );
 
@@ -35,9 +37,9 @@ class AppBarAni extends StatelessWidget {
   );
 
   static const _bottomDecoration = BoxDecoration(
-    color: Colors.black,
+    color: Colors.white,
     border: Border(
-      top: BorderSide(color: Colors.white, width: 1.0),
+      top: BorderSide(color: Colors.black, width: 1.0),
     ),
   );
 
