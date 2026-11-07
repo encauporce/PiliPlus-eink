@@ -176,7 +176,15 @@ class ZanButtonGrpc extends StatelessWidget {
                   color: isLike ? primary : outline,
                   semanticLabel: isLike ? '已赞' : '点赞',
                 ),
-                Text(NumUtils.numFormat(replyItem.like.toInt()), style: numStyle),
+                // FontAwesome 的拇指字形在 em 盒里偏上约 1dp，
+                // 数字上提 1dp 让两者墨迹中心重合（只影响绘制，不动布局/热区）
+                Transform.translate(
+                  offset: const Offset(0, -1),
+                  child: Text(
+                    NumUtils.numFormat(replyItem.like.toInt()),
+                    style: numStyle,
+                  ),
+                ),
               ],
             ),
           ),
