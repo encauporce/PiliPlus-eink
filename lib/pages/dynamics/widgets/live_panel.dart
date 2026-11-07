@@ -14,11 +14,8 @@ Widget livePanel(
   if (live == null) {
     return const SizedBox.shrink();
   }
-  return Padding(
-    padding: floor == 1
-        ? const EdgeInsets.symmetric(horizontal: 12)
-        : EdgeInsets.zero,
-    child: Row(
+  // 左右 12dp 留白统一由 module_panel 包（见 module()）。
+  return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         NetworkImgLayer(
@@ -58,7 +55,6 @@ Widget livePanel(
                   : theme.colorScheme.outline,
             ),
           ),
-      ],
-    ),
+    ],
   );
 }

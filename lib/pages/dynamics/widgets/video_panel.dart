@@ -33,15 +33,9 @@ Widget videoSeasonWidget(
     return const SizedBox.shrink();
   }
 
-  EdgeInsets padding;
-  if (floor == 1) {
-    padding = const EdgeInsets.symmetric(horizontal: 12);
-  } else {
-    padding = EdgeInsets.zero;
-  }
-  return Padding(
-    padding: padding,
-    child: Column(
+  // 左右 12dp 留白统一由 module_panel 包（见 module()），这里不再各自处理，
+  // 否则内嵌层会被叠加缩进。
+  return Column(
       spacing: 6,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -138,7 +132,6 @@ Widget videoSeasonWidget(
             style: const TextStyle(fontWeight: FontWeight.bold),
             overflow: isDetail ? null : TextOverflow.ellipsis,
           ),
-      ],
-    ),
+    ],
   );
 }

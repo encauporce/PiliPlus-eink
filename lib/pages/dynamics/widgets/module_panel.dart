@@ -40,6 +40,36 @@ Widget module(
   required bool isSave,
   required bool isDetail,
 }) {
+  final child = _moduleBody(
+    context,
+    floor: floor,
+    theme: theme,
+    item: item,
+    isSave: isSave,
+    isDetail: isDetail,
+  );
+  // 顶层卡片的左右 12dp 留白在这里统一收口。
+  // 以前只有视频卡、直播卡、合集卡各自补 12，活动卡、音乐卡、订阅卡的 Material
+  // 黑框直接贴到内容区两端：左边框正好压在左侧 UP 栏那条 1dp 分界线上，
+  // 1dp + 1dp 叠成 2dp 的黑竖线，右边框则贴屏。改成统一包一层后，
+  // 所有卡片边框与正文、操作栏对齐，内嵌层不再额外缩进（由父级 padding 负责）。
+  // 转发引用块自己在 floor == 2 时已有 margin，避免重复缩进。
+  return floor == 1 && item.type != 'DYNAMIC_TYPE_FORWARD'
+      ? Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: child,
+        )
+      : child;
+}
+
+Widget _moduleBody(
+  BuildContext context, {
+  required int floor,
+  required ThemeData theme,
+  required DynamicItemModel item,
+  required bool isSave,
+  required bool isDetail,
+}) {
   final moduleDynamic = item.modules.moduleDynamic;
   final major = moduleDynamic?.major;
 
@@ -246,7 +276,6 @@ Widget module(
       return Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (floor == 1) const SizedBox(width: 12),
           if (major?.medialist?.cover?.isNotEmpty == true) ...[
             Stack(
               clipBehavior: Clip.none,
@@ -297,7 +326,6 @@ Widget module(
               ),
             ),
           ),
-          if (floor == 1) const SizedBox(width: 12),
         ],
       );
 
@@ -312,11 +340,6 @@ Widget module(
       );
 
     default:
-      return Padding(
-        padding: floor == 1
-            ? const EdgeInsets.symmetric(horizontal: 12)
-            : EdgeInsets.zero,
-        child: Text('暂未支持的类型: \n${item.idStr}\n${item.type}'),
-      );
+      return Text('暂未支持的类型: \n${item.idStr}\n${item.type}');
   }
 }
