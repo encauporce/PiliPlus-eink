@@ -177,10 +177,10 @@ class ZanButtonGrpc extends StatelessWidget {
                   semanticLabel: isLike ? '已赞' : '点赞',
                 ),
                 // 垂直方向认袖口方块而不是整个拇指外形：拇指尖比袖口高出一截，
-                // 按整体居中数字就会浮上去。实机量得 13 号时数字中心比袖口中心低 1.5px，
-                // 这里回填一小格，字面上下沿落在袖口上下沿各自外侧约 1px。
+                // 按整体居中数字就会浮上去。实机量：2.1dp 时数字上沿与袖口齐平、
+                // 下沿多 2px（整体偏下 1px），回填一格让上下各多出 1px。
                 Transform.translate(
-                  offset: const Offset(0, 2.1),
+                  offset: const Offset(0, 1.7),
                   child: Text(
                     NumUtils.numFormat(replyItem.like.toInt()),
                     style: numStyle,
