@@ -239,8 +239,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
     });
   }
 
-  /// 视频真实宽高比。优先用解码出来的分辨率（surface 的 rect 可能已经被撑成
-  /// 容器尺寸，反推出来的比例是容器比例，不能用）。
+  /// 视频宽高比，取不到可靠值时返回 null。
+  /// 注意这个包会改写 surface 尺寸，rect/state 常常恒报 16:9，只当参考。
   double? _videoAspect() {
     final fit = playerController.videoFit.value;
     if (fit.aspectRatio != null) return fit.aspectRatio;
@@ -255,67 +255,44 @@ class _PlDanmakuState extends State<PlDanmaku> {
     return null;
   }
 
-  /// 画面在给定容器里实际占多宽（按当前 fit 等比铺开）。
-  double _videoWidth(Size size) {
-    final ar = _videoAspect();
-    if (ar == null) return size.width;
-    switch (playerController.videoFit.value.boxFit) {
-      case BoxFit.fill:
-      case BoxFit.cover:
-      case BoxFit.fitWidth:
-      case BoxFit.none:
-        return size.width;
-      default:
-        final w = size.height * ar;
-        return w > size.width ? size.width : w;
-    }
-  }
-
-  /// surface 是否已经被撑成整个容器。撑满时 FittedBox 的 alignment 没有可挪
-  /// 的空间，画面实际还在中间（黑边是 surface 内部做的），板只能占单侧一半。
-  bool _surfaceFillsBox(Size box) {
-    final rect = playerController.videoController?.rect.value;
-    if (rect == null ||
-        rect.width <= 0 ||
-        rect.height <= 0 ||
-        box.width <= 0 ||
-        box.height <= 0) {
-      return false;
-    }
-    return ((rect.width / rect.height) - (box.width / box.height)).abs() < 0.02;
-  }
-
   Widget _buildBoard() {
     final align = playerController.videoAlignment.value;
     // align == left 表示画面贴左，板落到右边，反之亦然
     final boardOnRight = align == VideoAlignmentType.left;
     return LayoutBuilder(
       builder: (context, c) {
-        // 用父级真实约束，widget.size 在部分布局路径上跟实际显示区不一致
         final cw = c.maxWidth.isFinite ? c.maxWidth : widget.size.width;
         final ch = c.maxHeight.isFinite ? c.maxHeight : widget.size.height;
-        final box = Size(cw, ch);
-        final blank = (cw - _videoWidth(box)).clamp(0.0, cw).toDouble();
-        // 画面确实贴边时，空白全在另一侧；若对齐没把画面挪过去（居中），
-        // 两侧各占一半。两种情况下板都只吃真正空出来的那一块，不压画面。
-        final surfaceFills = _surfaceFillsBox(box);
-        final boardW = (align == VideoAlignmentType.center || surfaceFills)
-            ? blank / 2
-            : blank;
-        final fontSize = boardW < 170 ? 11.0 : 13.0;
-        final dbg =
-            '${align.index}|${blank.round()}|${cw.round()}x${ch.round()}|'
-            '${surfaceFills ? 1 : 0}';
+        // 画面高度：LayoutBuilder 的约束有时比实际显示区小一截，取大的那个
+        final boxH = widget.size.height > ch ? widget.size.height : ch;
+        final ar = _videoAspect();
+        double boardW;
+        if (ar != null && ar < cw / boxH) {
+          // 竖视频：上下贴满，两侧按比例空出来，板只占一侧
+          final videoW = boxH * ar;
+          boardW = (cw - videoW) / 2;
+        } else {
+          // 比例不可信（恒报 16:9）：按这种播放器的经验值，单侧空白约 1/6
+          boardW = cw * 0.167;
+        }
+        boardW = boardW.clamp(48.0, 150.0).toDouble();
+        final fontSize = boardW < 90 ? 11.0 : 12.5;
+        final dbg = '${align.index}|${cw.round()}x${ch.round()}|'
+            '${widget.size.width.round()}x${widget.size.height.round()}|'
+            '${boardW.round()}';
         if (dbg != _dbgKey) {
           _dbgKey = dbg;
           debugPrint(
             '[dm-board] align=$align container=${cw.round()}x${ch.round()} '
-            'videoW=${_videoWidth(box).round()} blank=${blank.round()} '
-            'boardW=${boardW.round()} n=${_board.length}',
+            'widget=${widget.size.width.round()}x'
+            '${widget.size.height.round()} ar=$ar boardW=${boardW.round()} '
+            'n=${_board.length} full=${widget.isFullScreen}',
           );
         }
-        // 只吃画面剩下的黑边：放不下字就不画（宁可没有，也别压住画面）
-        if (boardW < 64 || _board.isEmpty) return const SizedBox.shrink();
+        // 全屏下画面铺满，没有黑边可用，仍旧走飞行弹幕
+        if (widget.isFullScreen || _board.isEmpty) {
+          return const SizedBox.shrink();
+        }
         final side = const BorderSide(color: Colors.black, width: 1.0);
         return Align(
           alignment:
@@ -400,7 +377,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
     );
     return Obx(() {
       // 必须在这个闭包里读，才会订阅 videoAlignment 的变化
-      final board = _boardMode;
+      final board = _boardMode && !widget.isFullScreen;
       if (board != _boardAttached) {
         _boardAttached = board;
         if (board) {
