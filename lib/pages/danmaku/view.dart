@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:PiliPlus/grpc/bilibili/community/service/dm/v1.pb.dart';
 import 'package:PiliPlus/models/common/video/video_alignment_type.dart';
 import 'package:PiliPlus/pages/danmaku/controller.dart';
@@ -24,6 +25,10 @@ class PlDanmaku extends StatefulWidget {
   final bool isFileSource;
   final Size size;
 
+  /// 播放器底色（PLVideoPlayer.fill）。留白那一侧就是这个颜色，
+  /// 队列文字按它的明暗自适应 —— 这是白色底，写白字等于什么都没写。
+  final Color fill;
+
   const PlDanmaku({
     super.key,
     required this.cid,
@@ -32,6 +37,7 @@ class PlDanmaku extends StatefulWidget {
     required this.isFullScreen,
     required this.isFileSource,
     required this.size,
+    this.fill = Colors.white,
   });
 
   @override
@@ -51,10 +57,16 @@ class _PlDanmakuState extends State<PlDanmaku> {
   // 画面缩到一侧后，另一侧的黑边里用直播留言板那种一条一行的方式滚弹幕，
   // 每条按时长自然消失（不留时间轴）。
   final List<_BoardDanmaku> _board = [];
+  /// 队列版本号：Obx 订阅它，任何增删都靠它把重绘打出去
+  final RxInt _boardVer = 0.obs;
   /// 当前板子高度能放几条（按行高估），超出就从队头丢掉
   int _cap = 12;
   Timer? _boardTimer;
   bool _boardAttached = false;
+  /// 已经消费到哪个 100ms 桶，避免重复入队
+  int _boardPos = -1;
+  /// 上一次读到 / 正在显示的播放位置（仅用于排查）
+  int _dbgPos = 0;
   String _dbgKey = '';
 
   bool get _boardMode =>
@@ -140,7 +152,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
         .getCurrentDanmaku(currentPosition);
     if (currentDanmakuList != null) {
       if (_boardMode) {
-        _appendToBoard(currentDanmakuList);
+        // 队列由 _boardTimer 自己按桶消费，这里再塞一次会让同一句的
+        // 重复计数翻倍，所以位置回调在队列模式下不参与。
         return;
       }
       if (_controller == null) {
@@ -199,9 +212,9 @@ class _PlDanmakuState extends State<PlDanmaku> {
     return Duration(milliseconds: ms.clamp(5000, 15000).toInt());
   }
 
-  /// 把当前时刻的弹幕塞进留言板。同一个 100ms 桶只会被取一次，
-  /// 所以不需要再去重；只在真的有新条目时重建，避免墨水屏无意义刷新。
-  void _appendToBoard(List<DanmakuElem> list) {
+  /// 把一批弹幕塞进队列。同一句刷屏就并成一条带次数，位置挪到最新，
+  /// 避免整块板被一句话占满。返回是否真的变了。
+  bool _pushAll(List<DanmakuElem> list) {
     final weight = DanmakuOptions.danmakuWeight;
     final now = DateTime.now();
     var changed = false;
@@ -209,7 +222,6 @@ class _PlDanmakuState extends State<PlDanmaku> {
       if (e.weight < weight) continue;
       final content = e.content.trim();
       if (content.isEmpty) continue;
-      // 同一句刷屏就并成一条带次数，位置挪到最新，避免整块板被一句话占满
       final idx = _board.lastIndexWhere((x) => x.content == content);
       final dup = idx >= 0 ? _board[idx].dup + 1 : 1;
       if (idx >= 0) _board.removeAt(idx);
@@ -222,23 +234,56 @@ class _PlDanmakuState extends State<PlDanmaku> {
       );
       changed = true;
     }
-    if (!changed) return;
-    if (_board.length > _cap) {
+    if (!changed) return false;
+    if (_cap > 0 && _board.length > _cap) {
       _board.removeRange(0, _board.length - _cap);
     }
-    if (mounted) setState(() {});
+    return true;
   }
 
-  /// 到点的留言自己退场。暂停时冻结，免得暂停看画面时整块板被清空。
+  /// 队列有任何变化都从这里把重绘打出去（版本号 + setState 双保险：
+  /// 只依赖 setState 时，Obx 内部的缓存有可能让子树的旧内容留在屏幕上）。
+  void _bump() {
+    if (!mounted) return;
+    _boardVer.value++;
+    setState(() {});
+  }
+
+  /// 队列的驱动：自己按 100ms 桶顺序取，不依赖播放器位置回调的节流
+  /// （位置流十几帧才来一次，回调里只取当前桶会漏掉中间桶）。
   void _startBoardTimer() {
-    _boardTimer ??= Timer.periodic(const Duration(milliseconds: 500), (_) {
-      if (!mounted) return;
-      if (!playerController.playerStatus.isPlaying) return;
+    _boardPos = playerController.positionInMilliseconds ~/ 100;
+    _boardTimer ??= Timer.periodic(
+      const Duration(milliseconds: 200),
+      (_) => _boardTick(),
+    );
+  }
+
+  void _boardTick() {
+    if (!mounted) return;
+    if (!playerController.enableShowDanmaku.value) return;
+    if (!playerController.showDanmaku && !widget.isPipMode) return;
+    _dbgPos = playerController.positionInMilliseconds;
+    var changed = false;
+    if (playerController.playerStatus.isPlaying) {
+      final bucket = _dbgPos ~/ 100;
+      if (bucket > _boardPos) {
+        // 拖进度时最多一次补 4s，别把整段弹幕一次灌进来
+        final from = math.max(_boardPos + 1, bucket - 40);
+        _boardPos = bucket;
+        for (var b = from; b <= bucket; b++) {
+          final list = _plDanmakuController.getCurrentDanmaku(b * 100);
+          if (list == null || list.isEmpty) continue;
+          changed = _pushAll(list) || changed;
+        }
+      }
+      // 到点的自己退场；暂停时冻结，免得看画面时整块板被清空
       final now = DateTime.now();
       final before = _board.length;
       _board.removeWhere((e) => !e.expireAt.isAfter(now));
-      if (_board.length != before) setState(() {});
-    });
+      if (_board.length != before) changed = true;
+    }
+    if (changed) _bump();
   }
 
   /// 视频显示宽高比。surface rect 是 syncPhysicalSurfaceSize 按 fit 算出来再
@@ -255,7 +300,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
     return playerController.videoFit.value.aspectRatio;
   }
 
-  Widget _buildBoard() {
+  Widget _buildBoard(int ver) {
     final align = playerController.videoAlignment.value;
     // 画面贴左 → 空白在右；贴右 → 空白在左
     final boardOnRight = align == VideoAlignmentType.left;
@@ -274,7 +319,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
         final fillsWidth =
             fit == BoxFit.fill || fit == BoxFit.cover || fit == BoxFit.fitWidth;
         // 和 FittedBox(fit: contain) 同一套：画面高度吃满容器，宽度按比例
-        final arW = (fillsWidth || ar == null || ar <= 0)
+        final arW = (fillsWidth || ar == null || ar <= 0 || !ar.isFinite)
             ? null
             : math.min(cw, boxH * ar);
         final rect = playerController.videoController?.rect.value;
@@ -283,6 +328,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
         if (fillsWidth) {
           videoW = cw;
         } else if (rectW > 0 &&
+            rectW.isFinite &&
             rectW <= cw * 1.02 &&
             (arW == null || (rectW - arW).abs() <= cw * 0.06)) {
           videoW = rectW;
@@ -292,7 +338,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
           videoW = cw;
         }
         // 单侧空白才是能写字的地方；画面铺满宽度就一个像素都不占
-        final blank = (cw - videoW).clamp(0.0, cw).toDouble();
+        var blank = (cw - videoW).clamp(0.0, cw).toDouble();
+        if (!blank.isFinite) blank = 0;
         final fontSize = blank < 110
             ? 11.0
             : (blank < 200 ? 12.5 : 14.0);
@@ -300,6 +347,15 @@ class _PlDanmakuState extends State<PlDanmaku> {
         final rowH = fontSize * 1.22 + 5;
         final cap = (ch / rowH).floor().clamp(1, 60);
         _cap = cap;
+        // 留白底色就是播放器底色：白底要写黑字，深色底才写白字
+        final onLight = widget.fill.computeLuminance() > 0.5;
+        final ink = onLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
+        final inkSub = onLight
+            ? const Color(0x99000000)
+            : const Color(0x99FFFFFF);
+        final lineColor = onLight
+            ? const Color(0x33000000)
+            : const Color(0x40FFFFFF);
         final dbg = '${align.index}|${cw.round()}x${ch.round()}|'
             '${blank.round()}|$cap';
         if (dbg != _dbgKey) {
@@ -308,10 +364,35 @@ class _PlDanmakuState extends State<PlDanmaku> {
             '[dm-board] align=$align box=${cw.round()}x${ch.round()} '
             'ar=$ar rectW=${rectW.round()} videoW=${videoW.round()} '
             'blank=${blank.round()} cap=$cap n=${_board.length} '
-            'dpr=${dpr.toStringAsFixed(2)} fit=$fit',
+            'dpr=${dpr.toStringAsFixed(2)} fit=$fit v=$ver',
           );
         }
-        if (blank < 48) return const SizedBox.shrink();
+        // 排查用的一行小字：只在 debug 包里出现
+        Widget mark() => Text(
+          '留白${blank.round()} ${_dbgPos ~/ 1000}s n${_board.length}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(fontSize: 8, height: 1.2, color: inkSub),
+        );
+        if (blank < 48) {
+          if (!kDebugMode) return const SizedBox.shrink();
+          // 拿不到留白（fit 铺宽或 rect 还没上屏）时留个记号，便于定位
+          return Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              color: const Color(0x80000000),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Text(
+                'dm ${cw.round()}x${ch.round()} b${blank.round()} '
+                '${_dbgPos ~/ 1000}s n${_board.length}',
+                style: const TextStyle(
+                  fontSize: 9,
+                  color: Color(0xCCFFFFFF),
+                ),
+              ),
+            ),
+          );
+        }
         final items = _board.length > cap
             ? _board.sublist(_board.length - cap)
             : _board;
@@ -328,18 +409,16 @@ class _PlDanmakuState extends State<PlDanmaku> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (items.isEmpty && kDebugMode) mark(),
                   for (final item in items)
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 6,
                         vertical: 2,
                       ),
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         border: Border(
-                          bottom: BorderSide(
-                            color: Color(0x40FFFFFF),
-                            width: 0.8,
-                          ),
+                          bottom: BorderSide(color: lineColor, width: 0.8),
                         ),
                       ),
                       child: Text.rich(
@@ -351,7 +430,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
                                 text: ' ×${item.dup}',
                                 style: TextStyle(
                                   fontSize: fontSize - 1.5,
-                                  color: const Color(0x99FFFFFF),
+                                  color: inkSub,
                                 ),
                               ),
                           ],
@@ -361,7 +440,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
                         style: TextStyle(
                           fontSize: fontSize,
                           height: 1.22,
-                          color: Colors.white,
+                          color: ink,
                         ),
                       ),
                     ),
@@ -396,6 +475,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
       // 全屏横屏时竖视频两侧才真有留白，所以这里不再排除全屏；
       // 是否显示由 _buildBoard 按真实空白宽度决定。
       final board = _boardMode;
+      // 订阅队列版本号：入队/过期都靠它把这一帧打出来
+      final ver = _boardVer.value;
       if (board != _boardAttached) {
         _boardAttached = board;
         if (board) {
@@ -411,6 +492,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
           _boardTimer?.cancel();
           _boardTimer = null;
           _board.clear();
+          _boardPos = -1;
         }
       }
       return AnimatedOpacity(
@@ -420,7 +502,7 @@ class _PlDanmakuState extends State<PlDanmaku> {
         duration: const Duration(milliseconds: 100),
         // 画面对齐选了左/右：留着飞行弹幕会从贴边那侧飞出去，改成留言板列表
         child: board
-            ? _buildBoard()
+            ? _buildBoard(ver)
             : DanmakuScreen<DanmakuExtra>(
                 createdController: (e) {
                   playerController.danmakuController = _controller = e;
