@@ -54,13 +54,13 @@ class _PlDanmakuState extends State<PlDanmaku> {
   int latestAddedPosition = -1;
 
   // ---- 留言板模式（画面对齐为左/右时启用）----
-  // 画面缩到一侧后，另一侧的黑边里用直播留言板那种一条一行的方式滚弹幕，
-  // 每条按时长自然消失（不留时间轴）。
+  // 画面缩到一侧后，另一侧空出来的留白里按直播留言板的方式一条条往下排，
+  // 长句自己折行，每条按时长自然消失（不留时间轴）。
   final List<_BoardDanmaku> _board = [];
   /// 队列版本号：Obx 订阅它，任何增删都靠它把重绘打出去
   final RxInt _boardVer = 0.obs;
-  /// 当前板子高度能放几条（按行高估），超出就从队头丢掉
-  int _cap = 12;
+  /// 队列里最多留这么多条（真正显示几条由留白高度决定，见 _fitItems）
+  static const int _maxKept = 120;
   Timer? _boardTimer;
   bool _boardAttached = false;
   /// 已经消费到哪个 100ms 桶，避免重复入队
@@ -235,8 +235,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
       changed = true;
     }
     if (!changed) return false;
-    if (_cap > 0 && _board.length > _cap) {
-      _board.removeRange(0, _board.length - _cap);
+    if (_board.length > _maxKept) {
+      _board.removeRange(0, _board.length - _maxKept);
     }
     return true;
   }
@@ -300,6 +300,42 @@ class _PlDanmakuState extends State<PlDanmaku> {
     return playerController.videoFit.value.aspectRatio;
   }
 
+  /// 一条留言最多折几行（太长的刷屏句子不该占掉整列）
+  static const int _maxLines = 6;
+
+  /// 估算一条留言占多高：留白很窄，长句会折成好几行，行数按字宽算。
+  /// 全角（汉字/假名/全角标点）按 1 个字宽，其余（英文数字）按 0.55 折算。
+  double _rowEstimate(String content, int dup, double textW, double fontSize) {
+    var units = 0.0;
+    for (final r in content.runes) {
+      units += r < 0x2E80 ? 0.55 : 1.0;
+    }
+    if (dup > 1) units += 2.5; // " ×12"
+    final perLine = math.max(1.0, textW / fontSize);
+    final lines = math.min(
+      _maxLines,
+      math.max(1, (units / perLine).ceil()),
+    );
+    return lines * fontSize * 1.22 + 4.8; // 上下 padding 4 + 分割线 0.8
+  }
+
+  /// 从队尾往回取，能塞进这块高度的都留下（多了从队头丢）。
+  /// 高度是估的，宁可少塞一条也别溢出被裁掉半行。
+  List<_BoardDanmaku> _fitItems(double textW, double fontSize, double height) {
+    if (_board.isEmpty) return const [];
+    final limit = height * 0.98;
+    final out = <_BoardDanmaku>[];
+    var used = 0.0;
+    for (var i = _board.length - 1; i >= 0; i--) {
+      final item = _board[i];
+      final h = _rowEstimate(item.content, item.dup, textW, fontSize);
+      if (used + h > limit && out.isNotEmpty) break;
+      used += h;
+      out.insert(0, item);
+    }
+    return out;
+  }
+
   Widget _buildBoard(int ver) {
     final align = playerController.videoAlignment.value;
     // 画面贴左 → 空白在右；贴右 → 空白在左
@@ -343,10 +379,6 @@ class _PlDanmakuState extends State<PlDanmaku> {
         final fontSize = blank < 110
             ? 11.0
             : (blank < 200 ? 12.5 : 14.0);
-        // 队列容量：这一列能摞下的条数，多的从队头丢
-        final rowH = fontSize * 1.22 + 5;
-        final cap = (ch / rowH).floor().clamp(1, 60);
-        _cap = cap;
         // 留白底色就是播放器底色：白底要写黑字，深色底才写白字
         final onLight = widget.fill.computeLuminance() > 0.5;
         final ink = onLight ? const Color(0xFF000000) : const Color(0xFFFFFFFF);
@@ -356,20 +388,22 @@ class _PlDanmakuState extends State<PlDanmaku> {
         final lineColor = onLight
             ? const Color(0x33000000)
             : const Color(0x40FFFFFF);
+        final items = _fitItems(blank - 12, fontSize, ch);
         final dbg = '${align.index}|${cw.round()}x${ch.round()}|'
-            '${blank.round()}|$cap';
+            '${blank.round()}|${items.length}';
         if (dbg != _dbgKey) {
           _dbgKey = dbg;
           debugPrint(
             '[dm-board] align=$align box=${cw.round()}x${ch.round()} '
             'ar=$ar rectW=${rectW.round()} videoW=${videoW.round()} '
-            'blank=${blank.round()} cap=$cap n=${_board.length} '
+            'blank=${blank.round()} show=${items.length}/${_board.length} '
             'dpr=${dpr.toStringAsFixed(2)} fit=$fit v=$ver',
           );
         }
         // 排查用的一行小字：只在 debug 包里出现
         Widget mark() => Text(
-          '留白${blank.round()} ${_dbgPos ~/ 1000}s n${_board.length}',
+          '留白${blank.round()} ${_dbgPos ~/ 1000}s '
+          'n${items.length}/${_board.length}',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 8, height: 1.2, color: inkSub),
@@ -393,9 +427,6 @@ class _PlDanmakuState extends State<PlDanmaku> {
             ),
           );
         }
-        final items = _board.length > cap
-            ? _board.sublist(_board.length - cap)
-            : _board;
         return Align(
           alignment:
               boardOnRight ? Alignment.centerRight : Alignment.centerLeft,
@@ -403,8 +434,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
             width: blank,
             height: ch,
             // 不铺底板、不加边框：就写在画面空出来的那块里。
-            // 从最上面往下排，新的接在末尾；超出一条就从队头丢掉，
-            // 整列往上顶 —— 纯队列，没有滚动。
+            // 从最上面往下排，新的接在末尾、按字数折行；
+            // 一屏放不下就从队头丢掉最旧的 —— 纯队列，没有滚动。
             child: ClipRect(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
@@ -436,7 +467,9 @@ class _PlDanmakuState extends State<PlDanmaku> {
                               ),
                           ],
                         ),
-                        maxLines: 1,
+                        // 留白窄，长句要能折行，别被省略号截掉（最多 6 行）
+                        softWrap: true,
+                        maxLines: _maxLines,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: fontSize,
