@@ -676,8 +676,16 @@ Widget? addWidget(
         );
     }
     if (child != null) {
+      // 顶层附加卡片（预约/充电抽奖/商品/投票/通用/赛事/UGC）的左右 12dp 留白。
+      // module() 只包了 major 卡片，附加卡是 dynContent 里并列的一项，之前漏了：
+      // 左边框正好压在左侧 UP 栏那条 1dp 竖线上（叠成 2dp），右边框贴屏。
+      // 内嵌在转发引用块里的（floor > 1）已有 15dp 内边距，不再重复缩进。
       return Padding(
-        padding: const EdgeInsets.only(top: 6),
+        padding: EdgeInsets.only(
+          top: 6,
+          left: floor == 1 ? 12 : 0,
+          right: floor == 1 ? 12 : 0,
+        ),
         // 墨水屏：原来用 8% 灰底区分附加卡片，黑白屏上糊成一块脏灰，
         // 改成白底 + 1dp 黑框。
         child: Material(

@@ -9,7 +9,8 @@ Widget blockedItem(
   required ModuleBlocked blocked,
 }) {
   return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 1),
+    // 13 → 12：和正文/content() 的左右留白同一条轴，避免这一行比其它行突出 1dp
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 1),
     child: moduleBlockedItem(context, theme.colorScheme, blocked),
   );
 }
