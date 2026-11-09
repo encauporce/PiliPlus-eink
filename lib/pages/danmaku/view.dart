@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:PiliPlus/grpc/bilibili/community/service/dm/v1.pb.dart';
 import 'package:PiliPlus/models/common/video/video_alignment_type.dart';
@@ -240,20 +241,18 @@ class _PlDanmakuState extends State<PlDanmaku> {
     });
   }
 
-  /// 视频宽高比，取不到可靠值时返回 null。
-  /// 注意这个包会改写 surface 尺寸，rect/state 常常恒报 16:9，只当参考。
+  /// 视频显示宽高比。surface rect 是 syncPhysicalSurfaceSize 按 fit 算出来再
+  /// 上屏的那块尺寸，比例就是画面上屏比例，优先用它；解码分辨率作退路。
   double? _videoAspect() {
-    final fit = playerController.videoFit.value;
-    if (fit.aspectRatio != null) return fit.aspectRatio;
-    final state = playerController.videoPlayerController?.state;
-    final vw = state?.width ?? 0;
-    final vh = state?.height ?? 0;
-    if (vw > 0 && vh > 0) return vw / vh;
     final rect = playerController.videoController?.rect.value;
     if (rect != null && rect.width > 0 && rect.height > 0) {
       return rect.width / rect.height;
     }
-    return null;
+    final state = playerController.videoPlayerController?.state;
+    final vw = state?.width ?? 0;
+    final vh = state?.height ?? 0;
+    if (vw > 0 && vh > 0) return vw / vh;
+    return playerController.videoFit.value.aspectRatio;
   }
 
   Widget _buildBoard() {
@@ -264,17 +263,33 @@ class _PlDanmakuState extends State<PlDanmaku> {
       builder: (context, c) {
         final cw = c.maxWidth.isFinite ? c.maxWidth : widget.size.width;
         final ch = c.maxHeight.isFinite ? c.maxHeight : widget.size.height;
-        final boxH = widget.size.height > ch ? widget.size.height : ch;
+        // widget.size 在切全屏那一帧可能还是上一套尺寸，差太多就不采信
+        final boxH = widget.size.height <= ch * 1.25
+            ? math.max(widget.size.height, ch)
+            : ch;
+        final dpr = MediaQuery.devicePixelRatioOf(context);
         final ar = _videoAspect();
-        if (ar == null || ar <= 0) return const SizedBox.shrink();
-        // 和 FittedBox(fit: contain) 同一套算法：画面高度吃满容器，宽度按比例
         final fit = playerController.videoFit.value.boxFit;
-        double videoW = cw;
-        if (fit == BoxFit.contain || fit == BoxFit.fitHeight) {
-          final w = boxH * ar;
-          videoW = w > cw ? cw : w;
-        } else if (fit == BoxFit.fitWidth) {
-          videoW = cw / ar > boxH ? boxH * ar : cw;
+        // 这几种 fit 的宽度是铺满容器的，本来就没有单侧留白
+        final fillsWidth =
+            fit == BoxFit.fill || fit == BoxFit.cover || fit == BoxFit.fitWidth;
+        // 和 FittedBox(fit: contain) 同一套：画面高度吃满容器，宽度按比例
+        final arW = (fillsWidth || ar == null || ar <= 0)
+            ? null
+            : math.min(cw, boxH * ar);
+        final rect = playerController.videoController?.rect.value;
+        final rectW = rect == null ? 0.0 : rect.width / dpr;
+        double videoW;
+        if (fillsWidth) {
+          videoW = cw;
+        } else if (rectW > 0 &&
+            rectW <= cw * 1.02 &&
+            (arW == null || (rectW - arW).abs() <= cw * 0.06)) {
+          videoW = rectW;
+        } else if (arW != null) {
+          videoW = arW;
+        } else {
+          videoW = cw;
         }
         // 单侧空白才是能写字的地方；画面铺满宽度就一个像素都不占
         final blank = (cw - videoW).clamp(0.0, cw).toDouble();
@@ -291,8 +306,9 @@ class _PlDanmakuState extends State<PlDanmaku> {
           _dbgKey = dbg;
           debugPrint(
             '[dm-board] align=$align box=${cw.round()}x${ch.round()} '
-            'ar=$ar videoW=${videoW.round()} blank=${blank.round()} '
-            'cap=$cap n=${_board.length}',
+            'ar=$ar rectW=${rectW.round()} videoW=${videoW.round()} '
+            'blank=${blank.round()} cap=$cap n=${_board.length} '
+            'dpr=${dpr.toStringAsFixed(2)} fit=$fit',
           );
         }
         if (blank < 48) return const SizedBox.shrink();
