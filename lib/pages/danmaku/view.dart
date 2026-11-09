@@ -50,7 +50,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
   // 画面缩到一侧后，另一侧的黑边里用直播留言板那种一条一行的方式滚弹幕，
   // 每条按时长自然消失（不留时间轴）。
   final List<_BoardDanmaku> _board = [];
-  static const int _boardMaxLen = 60;
+  /// 当前板子高度能放几条（按行高估），超出就从队头丢掉
+  int _cap = 12;
   Timer? _boardTimer;
   bool _boardAttached = false;
   String _dbgKey = '';
@@ -221,8 +222,8 @@ class _PlDanmakuState extends State<PlDanmaku> {
       changed = true;
     }
     if (!changed) return;
-    if (_board.length > _boardMaxLen) {
-      _board.removeRange(0, _board.length - _boardMaxLen);
+    if (_board.length > _cap) {
+      _board.removeRange(0, _board.length - _cap);
     }
     if (mounted) setState(() {});
   }
@@ -257,102 +258,98 @@ class _PlDanmakuState extends State<PlDanmaku> {
 
   Widget _buildBoard() {
     final align = playerController.videoAlignment.value;
-    // align == left 表示画面贴左，板落到右边，反之亦然
+    // 画面贴左 → 空白在右；贴右 → 空白在左
     final boardOnRight = align == VideoAlignmentType.left;
     return LayoutBuilder(
       builder: (context, c) {
         final cw = c.maxWidth.isFinite ? c.maxWidth : widget.size.width;
         final ch = c.maxHeight.isFinite ? c.maxHeight : widget.size.height;
-        // 画面高度：LayoutBuilder 的约束有时比实际显示区小一截，取大的那个
         final boxH = widget.size.height > ch ? widget.size.height : ch;
         final ar = _videoAspect();
-        double boardW;
-        if (ar != null && ar < cw / boxH) {
-          // 竖视频：上下贴满，两侧按比例空出来，板只占一侧
-          final videoW = boxH * ar;
-          boardW = (cw - videoW) / 2;
-        } else {
-          // 比例不可信（恒报 16:9）：按这种播放器的经验值，单侧空白约 1/6
-          boardW = cw * 0.167;
+        if (ar == null || ar <= 0) return const SizedBox.shrink();
+        // 和 FittedBox(fit: contain) 同一套算法：画面高度吃满容器，宽度按比例
+        final fit = playerController.videoFit.value.boxFit;
+        double videoW = cw;
+        if (fit == BoxFit.contain || fit == BoxFit.fitHeight) {
+          final w = boxH * ar;
+          videoW = w > cw ? cw : w;
+        } else if (fit == BoxFit.fitWidth) {
+          videoW = cw / ar > boxH ? boxH * ar : cw;
         }
-        boardW = boardW.clamp(48.0, 150.0).toDouble();
-        final fontSize = boardW < 90 ? 10.5 : 12.0;
+        // 单侧空白才是能写字的地方；画面铺满宽度就一个像素都不占
+        final blank = (cw - videoW).clamp(0.0, cw).toDouble();
+        final fontSize = blank < 110
+            ? 11.0
+            : (blank < 200 ? 12.5 : 14.0);
+        // 队列容量：这一列能摞下的条数，多的从队头丢
+        final rowH = fontSize * 1.22 + 5;
+        final cap = (ch / rowH).floor().clamp(1, 60);
+        _cap = cap;
         final dbg = '${align.index}|${cw.round()}x${ch.round()}|'
-            '${widget.size.width.round()}x${widget.size.height.round()}|'
-            '${boardW.round()}';
+            '${blank.round()}|$cap';
         if (dbg != _dbgKey) {
           _dbgKey = dbg;
           debugPrint(
-            '[dm-board] align=$align container=${cw.round()}x${ch.round()} '
-            'widget=${widget.size.width.round()}x'
-            '${widget.size.height.round()} ar=$ar boardW=${boardW.round()} '
-            'n=${_board.length} full=${widget.isFullScreen}',
+            '[dm-board] align=$align box=${cw.round()}x${ch.round()} '
+            'ar=$ar videoW=${videoW.round()} blank=${blank.round()} '
+            'cap=$cap n=${_board.length}',
           );
         }
-        // 全屏下画面铺满，没有黑边可用，仍旧走飞行弹幕
-        if (widget.isFullScreen || _board.isEmpty) {
-          return const SizedBox.shrink();
-        }
-        final side = const BorderSide(color: Colors.black, width: 1.0);
+        if (blank < 48) return const SizedBox.shrink();
+        final items = _board.length > cap
+            ? _board.sublist(_board.length - cap)
+            : _board;
         return Align(
           alignment:
               boardOnRight ? Alignment.centerRight : Alignment.centerLeft,
           child: SizedBox(
-            width: boardW,
+            width: blank,
             height: ch,
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(
-                  left: boardOnRight ? side : BorderSide.none,
-                  right: boardOnRight ? BorderSide.none : side,
-                ),
-              ),
-              child: ListView.builder(
-                // 倒序：新留言永远贴着底部进来，像直播间那样往上顶
-                reverse: true,
-                padding: EdgeInsets.zero,
-                itemCount: _board.length,
-                itemBuilder: (_, index) {
-                  final item = _board[_board.length - 1 - index];
-                  return Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 4,
-                      vertical: 2,
-                    ),
-                    decoration: const BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: Color(0xFFCCCCCC),
-                          width: 1.0,
+            // 不铺底板、不加边框：就写在画面空出来的那块里。
+            // 新的从底部进来，旧的从顶部被挤出去 —— 纯队列，没有滚动。
+            child: ClipRect(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final item in items)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: const BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: Color(0x40FFFFFF),
+                            width: 0.8,
+                          ),
+                        ),
+                      ),
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: item.content),
+                            if (item.dup > 1)
+                              TextSpan(
+                                text: ' ×${item.dup}',
+                                style: TextStyle(
+                                  fontSize: fontSize - 1.5,
+                                  color: const Color(0x99FFFFFF),
+                                ),
+                              ),
+                          ],
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: fontSize,
+                          height: 1.22,
+                          color: Colors.white,
                         ),
                       ),
                     ),
-                    child: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(text: item.content),
-                          if (item.dup > 1)
-                            TextSpan(
-                              text: ' ×${item.dup}',
-                              style: TextStyle(
-                                fontSize: fontSize - 1.5,
-                                color: const Color(0xFF666666),
-                              ),
-                            ),
-                        ],
-                      ),
-                      // 窄栏里长弹幕折两行就够，再多会把整条板撑爆
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: fontSize,
-                        height: 1.15,
-                        color: Colors.black,
-                      ),
-                    ),
-                  );
-                },
+                ],
               ),
             ),
           ),
@@ -380,7 +377,9 @@ class _PlDanmakuState extends State<PlDanmaku> {
     );
     return Obx(() {
       // 必须在这个闭包里读，才会订阅 videoAlignment 的变化
-      final board = _boardMode && !widget.isFullScreen;
+      // 全屏横屏时竖视频两侧才真有留白，所以这里不再排除全屏；
+      // 是否显示由 _buildBoard 按真实空白宽度决定。
+      final board = _boardMode;
       if (board != _boardAttached) {
         _boardAttached = board;
         if (board) {
