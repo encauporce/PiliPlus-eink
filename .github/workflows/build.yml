@@ -19,6 +19,7 @@ on:
             - "assets/**"
             - "pubspec.yaml"
             - "android/**"
+            - "ci/**"
             - ".github/workflows/build.yml"
     workflow_dispatch:
         inputs:
@@ -108,6 +109,20 @@ jobs:
               if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
               shell: pwsh
               run: lib/scripts/build.ps1 android
+
+            # GitHub Release 的下载端点经常 504（media_kit 的 gradle 会因为拿不到
+            # libmpv jar 直接构建失败）。jar 固定、带 sha256，直接放仓库里，
+            # 构建前塞进插件模块的 build 目录，gradle 校验通过后就不再下载。
+            - name: Prefetch libmpv jars
+              run: |
+                  plugin=$(ls -d ~/.pub-cache/git/media-kit-*/libs/android/media_kit_libs_android_video/android 2>/dev/null | head -1)
+                  if [ -z "$plugin" ]; then
+                    echo "media_kit plugin dir not found, let gradle download it"
+                    exit 0
+                  fi
+                  mkdir -p "$plugin/build/20260906"
+                  cp -f ci/libmpv-jars/*.jar "$plugin/build/20260906/"
+                  sha256sum "$plugin"/build/20260906/*.jar
 
             - name: Flutter Build Release Apk
               if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'push' }}
