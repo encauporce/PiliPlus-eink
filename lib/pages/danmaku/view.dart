@@ -403,10 +403,11 @@ class _PlDanmakuState extends State<PlDanmaku> {
             width: blank,
             height: ch,
             // 不铺底板、不加边框：就写在画面空出来的那块里。
-            // 新的从底部进来，旧的从顶部被挤出去 —— 纯队列，没有滚动。
+            // 从最上面往下排，新的接在末尾；超出一条就从队头丢掉，
+            // 整列往上顶 —— 纯队列，没有滚动。
             child: ClipRect(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   if (items.isEmpty && kDebugMode) mark(),
