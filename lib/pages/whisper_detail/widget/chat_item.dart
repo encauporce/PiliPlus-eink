@@ -233,7 +233,7 @@ class ChatItem extends StatelessWidget {
               style: TextStyle(
                 letterSpacing: 0.6,
                 height: 1.5,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: textColor,
                 fontSize: 12,
               ),
             ),
@@ -290,7 +290,7 @@ class ChatItem extends StatelessWidget {
               style: TextStyle(
                 letterSpacing: 0.6,
                 height: 1.5,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: textColor,
                 fontSize: 12,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -383,7 +383,7 @@ class ChatItem extends StatelessWidget {
                             style: TextStyle(
                               letterSpacing: 0.6,
                               height: 1.5,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: textColor,
                               fontSize: 12,
                             ),
                           ),
@@ -392,7 +392,7 @@ class ChatItem extends StatelessWidget {
                             style: TextStyle(
                               letterSpacing: 0.6,
                               height: 1.5,
-                              color: theme.colorScheme.onSurfaceVariant,
+                              color: textColor,
                               fontSize: 12,
                             ),
                           ),
@@ -617,7 +617,7 @@ class ChatItem extends StatelessWidget {
               style: TextStyle(
                 letterSpacing: 0.6,
                 height: 1.5,
-                color: theme.colorScheme.onSurfaceVariant,
+                color: textColor,
                 fontSize: 12,
               ),
             ),
