@@ -233,7 +233,7 @@ class ChatItem extends StatelessWidget {
               style: TextStyle(
                 letterSpacing: 0.6,
                 height: 1.5,
-                color: textColor.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -290,7 +290,7 @@ class ChatItem extends StatelessWidget {
               style: TextStyle(
                 letterSpacing: 0.6,
                 height: 1.5,
-                color: textColor.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 12,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -383,7 +383,7 @@ class ChatItem extends StatelessWidget {
                             style: TextStyle(
                               letterSpacing: 0.6,
                               height: 1.5,
-                              color: textColor.withValues(alpha: 0.6),
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -392,7 +392,7 @@ class ChatItem extends StatelessWidget {
                             style: TextStyle(
                               letterSpacing: 0.6,
                               height: 1.5,
-                              color: textColor.withValues(alpha: 0.6),
+                              color: theme.colorScheme.onSurfaceVariant,
                               fontSize: 12,
                             ),
                           ),
@@ -617,7 +617,7 @@ class ChatItem extends StatelessWidget {
               style: TextStyle(
                 letterSpacing: 0.6,
                 height: 1.5,
-                color: textColor.withValues(alpha: 0.6),
+                color: theme.colorScheme.onSurfaceVariant,
                 fontSize: 12,
               ),
             ),
@@ -659,7 +659,7 @@ class ChatItem extends StatelessWidget {
         style: TextStyle(
           height: 1.5,
           letterSpacing: 0.6,
-          color: theme.colorScheme.outline.withValues(alpha: 0.8),
+          color: theme.colorScheme.outline,
         ),
       ),
     );

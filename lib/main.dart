@@ -156,6 +156,9 @@ void main() async {
         systemNavigationBarColor: Colors.transparent,
         systemNavigationBarDividerColor: Colors.transparent,
         statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
+        systemNavigationBarIconBrightness: Brightness.dark,
         systemNavigationBarContrastEnforced: false,
       ),
     );
@@ -357,6 +360,7 @@ class MyApp extends StatelessWidget {
         child: child!,
       );
     }
+    child = HeroMode(enabled: false, child: child);
     if (PlatformUtils.isDesktop) {
       return BackDetector(
         onBack: _onBack,

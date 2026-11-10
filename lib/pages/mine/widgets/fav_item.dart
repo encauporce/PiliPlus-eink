@@ -35,16 +35,12 @@ class FavFolderItem extends StatelessWidget {
           DecoratedBox(
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.all(Radius.circular(12)),
-              boxShadow: [
-                BoxShadow(
-                  color: theme.colorScheme.onInverseSurface.withValues(
-                    alpha: 0.4,
-                  ),
-                  offset: const Offset(6, -8),
-                  blurRadius: 0.0,
-                  spreadRadius: 0.0,
-                ),
-              ],
+              border: Border.all(
+                color: theme.brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black,
+                width: 1.0,
+              ),
             ),
             child: Hero(
               tag: heroTag,

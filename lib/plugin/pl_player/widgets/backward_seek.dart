@@ -51,18 +51,13 @@ class BackwardSeekIndicatorState extends State<BackwardSeekIndicator> {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        splashColor: const Color(0x44767676),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
         onTap: increment,
         child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                Color(0x88767676),
-                Color(0x00767676),
-              ],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
+          decoration: BoxDecoration(
+            color: const Color(0x55000000),
+            border: Border.all(color: Colors.white, width: 1.0),
           ),
           alignment: Alignment.center,
           child: Column(

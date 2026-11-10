@@ -505,6 +505,9 @@ abstract final class Pref {
     return videoAlignment ?? VideoAlignmentType.center;
   }
 
+  static bool get defaultAudioMode =>
+      _setting.get(SettingBoxKey.defaultAudioMode, defaultValue: false);
+
   static bool get preInitPlayer =>
       _setting.get(SettingBoxKey.preInitPlayer, defaultValue: false);
 

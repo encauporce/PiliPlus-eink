@@ -98,33 +98,38 @@ class LiveCardVFollow extends StatelessWidget {
   }
 
   Widget videoStat() {
-    return Container(
-      height: 50,
-      padding: const EdgeInsets.only(top: 26, left: 10, right: 10),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: <Color>[
-            Colors.transparent,
-            Colors.black54,
-          ],
-          tileMode: TileMode.mirror,
-        ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            liveItem.areaName.toString(),
-            style: const TextStyle(fontSize: 11, color: Colors.white),
-          ),
-          if (liveItem.textSmall case final textSmall?)
-            Text(
-              '$textSmall围观',
-              style: const TextStyle(fontSize: 11, color: Colors.white),
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(6, 0, 6, 6),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+              decoration: const BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.all(Radius.circular(4)),
+              ),
+              child: Text(
+                liveItem.areaName.toString(),
+                style: const TextStyle(fontSize: 10, color: Colors.white),
+              ),
             ),
-        ],
+            if (liveItem.textSmall case final textSmall?)
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1.5),
+                decoration: const BoxDecoration(
+                  color: Colors.black,
+                  borderRadius: BorderRadius.all(Radius.circular(4)),
+                ),
+                child: Text(
+                  '$textSmall围观',
+                  style: const TextStyle(fontSize: 10, color: Colors.white),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

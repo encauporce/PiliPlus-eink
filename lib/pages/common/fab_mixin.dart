@@ -8,7 +8,8 @@ mixin BaseFabMixin<T extends StatefulWidget> on State<T>, TickerProvider {
   AnimationController _initController() {
     return AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 100),
+      duration: Duration.zero,
+      reverseDuration: Duration.zero,
     );
   }
 

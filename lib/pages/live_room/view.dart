@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
@@ -16,6 +17,8 @@ import 'package:PiliPlus/common/widgets/scaffold/simple_scaffold.dart';
 import 'package:PiliPlus/common/widgets/scroll_physics.dart'
     show tabBarScrollPhysics;
 import 'package:PiliPlus/models/common/live/live_contribution_rank_type.dart';
+import 'package:PiliPlus/models/common/video/video_alignment_type.dart';
+import 'package:PiliPlus/models_new/live/live_danmaku/danmaku_msg.dart';
 import 'package:PiliPlus/models_new/live/live_room_info_h5/data.dart';
 import 'package:PiliPlus/models_new/live/live_superchat/item.dart';
 import 'package:PiliPlus/pages/danmaku/danmaku_model.dart';
@@ -1085,6 +1088,205 @@ class LiveDanmaku extends StatefulWidget {
 class _LiveDanmakuState extends State<LiveDanmaku> {
   PlPlayerController get plPlayerController => widget.plPlayerController;
 
+  final List<_LiveBoardDanmaku> _board = [];
+  final RxInt _boardVer = 0.obs;
+  static const int _maxKept = 100;
+  static const int _maxLines = 6;
+  Timer? _boardTimer;
+  StreamSubscription? _msgSub;
+  bool _boardAttached = false;
+
+  bool get _boardMode =>
+      plPlayerController.videoAlignment.value != VideoAlignmentType.center;
+
+  @override
+  void initState() {
+    super.initState();
+    _msgSub = widget.liveRoomController.messages.listen((list) {
+      if (!_boardMode) return;
+      if (list.isNotEmpty) {
+        final last = list.last;
+        if (last is DanmakuMsg) {
+          _push(last.text);
+        } else if (last is SuperChatItem) {
+          _push(last.message);
+        }
+      }
+    });
+  }
+
+  void _push(String text) {
+    final content = text.trim();
+    if (content.isEmpty) return;
+    final now = DateTime.now();
+    final idx = _board.lastIndexWhere((x) => x.content == content);
+    final dup = idx >= 0 ? _board[idx].dup + 1 : 1;
+    if (idx >= 0) _board.removeAt(idx);
+    _board.add(
+      _LiveBoardDanmaku(
+        content: content,
+        dup: dup,
+        expireAt: now.add(_stayOf(content, dup)),
+      ),
+    );
+    if (_board.length > _maxKept) {
+      _board.removeRange(0, _board.length - _maxKept);
+    }
+    _bump();
+  }
+
+  Duration _stayOf(String content, int dup) {
+    final len = content.runes.length;
+    var ms = 4000 + len * 300;
+    if (dup > 1) ms += (dup - 1) * 1500;
+    return Duration(milliseconds: ms.clamp(5000, 15000).toInt());
+  }
+
+  void _bump() {
+    if (!mounted) return;
+    _boardVer.value++;
+    setState(() {});
+  }
+
+  void _startBoardTimer() {
+    _boardTimer ??= Timer.periodic(
+      const Duration(milliseconds: 500),
+      (_) {
+        if (!mounted || !_boardMode) return;
+        final now = DateTime.now();
+        final before = _board.length;
+        _board.removeWhere((e) => !e.expireAt.isAfter(now));
+        if (_board.length != before) _bump();
+      },
+    );
+  }
+
+  double? _videoAspect() {
+    final rect = plPlayerController.videoController?.rect.value;
+    if (rect != null && rect.width > 0 && rect.height > 0) {
+      return rect.width / rect.height;
+    }
+    final state = plPlayerController.videoPlayerController?.state;
+    final vw = state?.width ?? 0;
+    final vh = state?.height ?? 0;
+    if (vw > 0 && vh > 0) return vw / vh;
+    return plPlayerController.videoFit.value.aspectRatio;
+  }
+
+  double _rowEstimate(String content, int dup, double textW, double fontSize) {
+    var units = 0.0;
+    for (final r in content.runes) {
+      units += r < 0x2E80 ? 0.55 : 1.0;
+    }
+    if (dup > 1) units += 2.5;
+    final perLine = max(1.0, textW / fontSize);
+    final lines = min(
+      _maxLines,
+      max(1, (units / perLine).ceil()),
+    );
+    return lines * fontSize * 1.22 + 4.8;
+  }
+
+  List<_LiveBoardDanmaku> _fitItems(double textW, double fontSize, double height) {
+    if (_board.isEmpty) return const [];
+    final limit = height * 0.98;
+    final out = <_LiveBoardDanmaku>[];
+    var used = 0.0;
+    for (var i = _board.length - 1; i >= 0; i--) {
+      final item = _board[i];
+      final h = _rowEstimate(item.content, item.dup, textW, fontSize);
+      if (used + h > limit && out.isNotEmpty) break;
+      used += h;
+      out.insert(0, item);
+    }
+    return out;
+  }
+
+  Widget _buildBoard(int ver) {
+    final align = plPlayerController.videoAlignment.value;
+    final boardOnRight = align == VideoAlignmentType.left;
+    return LayoutBuilder(
+      builder: (context, c) {
+        final cw = c.maxWidth.isFinite ? c.maxWidth : widget.size.width;
+        final ch = c.maxHeight.isFinite ? c.maxHeight : widget.size.height;
+        final boxH = widget.size.height <= ch * 1.25
+            ? max(widget.size.height, ch)
+            : ch;
+        final dpr = MediaQuery.devicePixelRatioOf(context);
+        final ar = _videoAspect();
+        final fit = plPlayerController.videoFit.value.boxFit;
+        final fillsWidth =
+            fit == BoxFit.fill || fit == BoxFit.cover || fit == BoxFit.fitWidth;
+        final arW = (fillsWidth || ar == null || ar <= 0 || !ar.isFinite)
+            ? null
+            : min(cw, boxH * ar);
+        final rect = plPlayerController.videoController?.rect.value;
+        final rectW = rect == null ? 0.0 : rect.width / dpr;
+        double videoW;
+        if (fillsWidth) {
+          videoW = cw;
+        } else if (rectW > 0 &&
+            rectW.isFinite &&
+            rectW <= cw * 1.02 &&
+            (arW == null || (rectW - arW).abs() <= cw * 0.06)) {
+          videoW = rectW;
+        } else if (arW != null) {
+          videoW = arW;
+        } else {
+          videoW = cw;
+        }
+        var blank = (cw - videoW).clamp(0.0, cw).toDouble();
+        if (!blank.isFinite) blank = 0;
+        if (blank < 48) return const SizedBox.shrink();
+
+        final fontSize = blank < 110 ? 11.0 : (blank < 200 ? 12.5 : 14.0);
+        const ink = Color(0xFF000000);
+        const inkSub = Color(0x99000000);
+        const lineColor = Color(0x33000000);
+        final items = _fitItems(blank - 12, fontSize, ch);
+
+        return Align(
+          alignment: boardOnRight ? Alignment.centerRight : Alignment.centerLeft,
+          child: SizedBox(
+            width: blank,
+            height: ch,
+            child: ClipRect(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (final item in items)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: const BoxDecoration(
+                        border: Border(bottom: BorderSide(color: lineColor, width: 0.8)),
+                      ),
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(text: item.content),
+                            if (item.dup > 1)
+                              TextSpan(
+                                text: ' ×',
+                                style: TextStyle(fontSize: fontSize - 1.5, color: inkSub),
+                              ),
+                          ],
+                        ),
+                        softWrap: true,
+                        maxLines: _maxLines,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: fontSize, height: 1.22, color: ink),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   void didUpdateWidget(LiveDanmaku oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1099,21 +1301,58 @@ class _LiveDanmakuState extends State<LiveDanmaku> {
   @override
   Widget build(BuildContext context) {
     final option = DanmakuOptions.get(notFullscreen: widget.notFullscreen);
-    return Obx(
-      () => AnimatedOpacity(
+    return Obx(() {
+      final board = _boardMode;
+      final ver = _boardVer.value;
+      if (board != _boardAttached) {
+        _boardAttached = board;
+        if (board) {
+          _startBoardTimer();
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            widget.liveRoomController.danmakuController =
+                plPlayerController.danmakuController = null;
+          });
+        } else {
+          _boardTimer?.cancel();
+          _boardTimer = null;
+          _board.clear();
+        }
+      }
+      return AnimatedOpacity(
         opacity: plPlayerController.enableShowLiveDanmaku.value
             ? plPlayerController.danmakuOpacity.value
             : 0,
         duration: const Duration(milliseconds: 100),
-        child: DanmakuScreen<DanmakuExtra>(
-          createdController: (e) {
-            widget.liveRoomController.danmakuController =
-                plPlayerController.danmakuController = e;
-          },
-          option: option,
-          size: widget.size,
-        ),
-      ),
-    );
+        child: board
+            ? _buildBoard(ver)
+            : DanmakuScreen<DanmakuExtra>(
+                createdController: (e) {
+                  widget.liveRoomController.danmakuController =
+                      plPlayerController.danmakuController = e;
+                },
+                option: option,
+                size: widget.size,
+              ),
+      );
+    });
   }
+
+  @override
+  void dispose() {
+    _msgSub?.cancel();
+    _boardTimer?.cancel();
+    super.dispose();
+  }
+}
+
+class _LiveBoardDanmaku {
+  const _LiveBoardDanmaku({
+    required this.content,
+    required this.dup,
+    required this.expireAt,
+  });
+  final String content;
+  final int dup;
+  final DateTime expireAt;
 }

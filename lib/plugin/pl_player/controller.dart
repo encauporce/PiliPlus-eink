@@ -183,7 +183,7 @@ class PlPlayerController with BlockConfigMixin, AudioNormalizationMixin {
   bool isMuted = false;
 
   /// 听视频
-  late final RxBool onlyPlayAudio = false.obs;
+  late final RxBool onlyPlayAudio = Pref.defaultAudioMode.obs;
 
   /// 镜像
   late final RxBool flipX = false.obs;

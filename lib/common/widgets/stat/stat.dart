@@ -20,7 +20,7 @@ class StatWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     Color color =
         this.color ??
-        Theme.of(context).colorScheme.outline.withValues(alpha: 0.8);
+        Theme.of(context).colorScheme.outline;
     return Row(
       spacing: 2,
       mainAxisSize: MainAxisSize.min,

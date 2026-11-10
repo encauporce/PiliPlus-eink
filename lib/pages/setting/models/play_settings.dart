@@ -77,6 +77,13 @@ List<SettingsModel> get playSettings => [
     onTap: _showVideoAlignmentDialog,
   ),
   const SwitchModel(
+    title: '默认纯音频模式',
+    subtitle: '进入视频后默认只播放音频流，关闭画面解码与着色器，降低能耗与发热',
+    leading: Icon(Icons.music_note_outlined),
+    setKey: SettingBoxKey.defaultAudioMode,
+    defaultVal: false,
+  ),
+  const SwitchModel(
     title: '自动播放',
     subtitle: '进入详情页自动播放',
     leading: Icon(Icons.motion_photos_auto_outlined),

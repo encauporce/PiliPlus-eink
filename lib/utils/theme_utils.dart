@@ -129,6 +129,10 @@ abstract final class ThemeUtils {
       canvasColor: isDark ? Colors.black : Colors.white,
       fontFamily: fontFamily,
       textTheme: textTheme,
+      splashFactory: NoSplash.splashFactory,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+      hoverColor: Colors.transparent,
       appBarTheme: AppBarTheme(
         elevation: 0,
         titleSpacing: 0,
