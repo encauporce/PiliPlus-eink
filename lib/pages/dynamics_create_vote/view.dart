@@ -52,7 +52,7 @@ class _CreateVotePageState extends State<CreateVotePage> {
     final divider = Divider(
       height: 20,
       thickness: 1,
-      color: theme.colorScheme.outline.withValues(alpha: 0.1),
+      color: theme.colorScheme.outline,
     );
     return SimpleScaffold(
       appBar: AppBar(

@@ -160,8 +160,7 @@ class _CreateDynPanelState extends CommonRichTextPubPageState<CreateDynPanel> {
                                     side: BorderSide(
                                       color: hasTopic
                                           ? Colors.transparent
-                                          : theme.colorScheme.outline
-                                                .withValues(alpha: 0.2),
+                                          : theme.colorScheme.outline,
                                     ),
                                     borderRadius: const BorderRadius.all(
                                       Radius.circular(25),

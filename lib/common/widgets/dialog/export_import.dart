@@ -377,7 +377,7 @@ Future<void> showImportExportDialog<T>(
         ),
         Divider(
           height: 1,
-          color: ColorScheme.of(context).outline.withValues(alpha: 0.1),
+          color: ColorScheme.of(context).outline,
         ),
         DialogOption(
           child: const Text('输入', style: style),

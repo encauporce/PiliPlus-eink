@@ -46,8 +46,8 @@ class AiConclusionPanel extends CommonSlidePage {
               SliverToBoxAdapter(
                 child: Divider(
                   height: 20,
-                  color: theme.dividerColor.withValues(alpha: 0.1),
-                  thickness: 6,
+                  color: theme.dividerColor,
+                  thickness: 1,
                 ),
               ),
           ],

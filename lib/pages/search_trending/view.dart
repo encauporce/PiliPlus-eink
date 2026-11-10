@@ -136,7 +136,7 @@ class _SearchTrendingPageState extends State<SearchTrendingPage> {
           final divider = Divider(
             height: 1,
             indent: 48,
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
+            color: theme.colorScheme.outline,
           );
           return SliverList.separated(
             itemCount: response.length,

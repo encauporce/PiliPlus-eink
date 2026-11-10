@@ -45,13 +45,13 @@ class _SpaceSettingPageState extends State<SpaceSettingPage> {
                   final divider = Divider(
                     height: 1,
                     indent: max(16, padding.left),
-                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                    color: theme.colorScheme.outline,
                   );
                   final dividerL = SliverToBoxAdapter(
                     child: Divider(
                       height: 12,
-                      thickness: 12,
-                      color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                      thickness: 1,
+                      color: theme.colorScheme.outline,
                     ),
                   );
                   return CustomScrollView(

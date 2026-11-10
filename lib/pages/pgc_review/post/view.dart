@@ -193,7 +193,7 @@ class _PgcReviewPostPanelState extends State<PgcReviewPostPanel> {
               color: theme.colorScheme.onInverseSurface,
               border: Border(
                 top: BorderSide(
-                  width: 0.5,
+                  width: 1.0,
                   color: theme.colorScheme.outline,
                 ),
               ),

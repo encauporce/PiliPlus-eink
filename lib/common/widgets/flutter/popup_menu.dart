@@ -95,7 +95,7 @@ class _CustomPopupMenuDividerState extends State<CustomPopupMenuDivider> {
       height: widget.height,
       thickness: widget.thickness,
       indent: widget.indent,
-      color: ColorScheme.of(context).outline.withValues(alpha: 0.2),
+      color: ColorScheme.of(context).outline,
       endIndent: widget.endIndent,
       radius: widget.radius,
     );

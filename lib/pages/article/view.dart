@@ -108,8 +108,8 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage>
               SelectionContainer.disabled(
                 child: SliverToBoxAdapter(
                   child: Divider(
-                    thickness: 8,
-                    color: theme.dividerColor.withValues(alpha: 0.05),
+                    thickness: 1,
+                    color: theme.dividerColor,
                   ),
                 ),
               ),
@@ -158,8 +158,8 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage>
           ),
         ),
         VerticalDivider(
-          thickness: 8,
-          color: theme.dividerColor.withValues(alpha: 0.05),
+          thickness: 1,
+          color: theme.dividerColor,
         ),
         Expanded(
           flex: flex1,
@@ -310,7 +310,7 @@ class _ArticlePageState extends CommonDynPageState<ArticlePage>
                     height: 20,
                     child: VerticalDivider(
                       width: 20,
-                      color: colorScheme.outline.withValues(alpha: .4),
+                      color: colorScheme.outline,
                     ),
                   ),
                   Text(

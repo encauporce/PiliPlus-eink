@@ -1668,7 +1668,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
                   height: 1,
                   indent: 12,
                   endIndent: 12,
-                  color: colorScheme.outline.withValues(alpha: .08),
+                  color: colorScheme.outline,
                 ),
               ),
             ),
@@ -1807,7 +1807,7 @@ class _VideoDetailPageVState extends State<VideoDetailPageV>
               const SizedBox(height: 8),
               Divider(
                 height: 1,
-                color: colorScheme.outline.withValues(alpha: 0.1),
+                color: colorScheme.outline,
               ),
             ],
             Padding(

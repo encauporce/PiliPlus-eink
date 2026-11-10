@@ -62,7 +62,7 @@ class _ContributionRankPanelState extends State<ContributionRankPanel>
                 .toList(),
             dividerColor: Theme.of(
               context,
-            ).colorScheme.outline.withValues(alpha: 0.3),
+            ).colorScheme.outline,
             onTap: (index) {
               if (!_tabController.indexIsChanging) {
                 Get.find<ContributionRankController>(

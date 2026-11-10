@@ -422,7 +422,7 @@ class _LoginPageState extends State<LoginPage> {
                 SizedBox(
                   height: 24,
                   child: VerticalDivider(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.5),
+                    color: theme.colorScheme.outline,
                   ),
                 ),
                 const SizedBox(width: 6),

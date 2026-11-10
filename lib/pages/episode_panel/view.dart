@@ -759,7 +759,7 @@ class _EpisodePanelState extends State<EpisodePanel>
     padding: .symmetric(horizontal: !_isSidePanel ? 14 : 6),
     decoration: BoxDecoration(
       border: Border(
-        bottom: BorderSide(color: colorScheme.outline.withValues(alpha: 0.1)),
+        bottom: BorderSide(color: colorScheme.outline),
       ),
     ),
     child: Row(

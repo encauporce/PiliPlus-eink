@@ -125,7 +125,7 @@ class _WhisperPageState extends State<WhisperPage> {
             indent: 72,
             endIndent: 20,
             height: 0,
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.black,
           );
           return SliverList.separated(
             itemCount: response.length,

@@ -122,12 +122,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildBody() {
     late final divider = Divider(
       height: 1,
-      color: theme.dividerColor.withValues(alpha: 0.1),
+      color: theme.dividerColor,
     );
 
     late final divider1 = Divider(
-      thickness: 16,
-      color: theme.dividerColor.withValues(alpha: 0.1),
+      thickness: 1,
+      color: theme.dividerColor,
     );
 
     return switch (_loadingState) {

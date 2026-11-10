@@ -193,7 +193,7 @@ class SpellCheckSuggestionsToolbar extends StatelessWidget {
       }
       return DecoratedBox(
         decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Colors.grey)),
+          border: Border(top: BorderSide(color: Colors.black)),
         ),
         child: button,
       );

@@ -52,7 +52,7 @@ class LoginDevicesPageState extends State<LoginDevicesPage> {
         if (response != null && response.isNotEmpty) {
           final divider = Divider(
             height: 1,
-            color: colorScheme.outline.withValues(alpha: 0.1),
+            color: colorScheme.outline,
           );
           return SliverList.separated(
             itemBuilder: (context, index) {

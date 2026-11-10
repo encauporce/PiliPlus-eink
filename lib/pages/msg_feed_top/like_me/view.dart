@@ -87,7 +87,7 @@ class _LikeMePageState extends State<LikeMePage> {
           indent: 72,
           endIndent: 20,
           height: 6,
-          color: Colors.grey.withValues(alpha: 0.1),
+          color: Colors.black,
         );
         return Builder(
           builder: (context) {

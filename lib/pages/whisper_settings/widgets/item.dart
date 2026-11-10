@@ -119,7 +119,7 @@ class ImSettingsItem extends StatelessWidget {
       late final divider = Divider(
         height: 1,
         indent: 16,
-        color: outline.withValues(alpha: 0.1),
+        color: outline,
       );
       return Column(
         mainAxisSize: MainAxisSize.min,

@@ -98,7 +98,7 @@ class _DownloadPanelState extends State<DownloadPanel> {
 
   @override
   Widget build(BuildContext context) {
-    final dividerColor = colorScheme.outline.withValues(alpha: 0.2);
+    final dividerColor = colorScheme.outline;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [

@@ -233,7 +233,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
           child: Divider(
             height: 20,
             color: theme.colorScheme.outline,
-            thickness: 6,
+            thickness: 1,
           ),
         ),
       ],

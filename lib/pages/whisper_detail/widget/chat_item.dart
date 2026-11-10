@@ -125,7 +125,7 @@ class ChatItem extends StatelessWidget {
                   Divider(
                     height: 10,
                     thickness: 1,
-                    color: theme.colorScheme.outline.withValues(alpha: 0.2),
+                    color: theme.colorScheme.outline,
                   ),
                   Text(
                     '此条消息为自动回复',
@@ -740,7 +740,7 @@ class ChatItem extends StatelessWidget {
       if (uri != null && uri.isNotEmpty) {
         final String? text = content['jump_text$index'];
         return [
-          Divider(color: theme.colorScheme.primary.withValues(alpha: 0.05)),
+          Divider(color: theme.colorScheme.primary),
           GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => PiliScheme.routePushFromUrl(uri),
@@ -770,7 +770,7 @@ class ChatItem extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            Divider(color: theme.colorScheme.primary.withValues(alpha: 0.05)),
+            Divider(color: theme.colorScheme.primary),
             if ((content['text'] as String?)?.isNotEmpty == true)
               Text(content['text']),
             if (modules != null && modules.isNotEmpty) ...[

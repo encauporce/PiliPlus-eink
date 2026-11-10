@@ -422,7 +422,7 @@ class _AudioPageState extends State<AudioPage> {
                 ),
                 Divider(
                   height: 1,
-                  color: colorScheme.outline.withValues(alpha: 0.1),
+                  color: colorScheme.outline,
                 ),
                 Padding(
                   padding: EdgeInsets.only(

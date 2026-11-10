@@ -135,7 +135,7 @@ class _EmotePanelState extends State<EmotePanel>
                   ),
                   Divider(
                     height: 1,
-                    color: theme.dividerColor.withValues(alpha: 0.1),
+                    color: theme.dividerColor,
                   ),
                   Row(
                     children: [

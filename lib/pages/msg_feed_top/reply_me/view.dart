@@ -89,7 +89,7 @@ class _ReplyMePageState extends State<ReplyMePage> {
             indent: 72,
             endIndent: 20,
             height: 6,
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: Colors.black,
           );
           return SliverList.separated(
             itemCount: response.length,

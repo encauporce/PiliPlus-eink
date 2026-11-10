@@ -57,7 +57,7 @@ class _SearchAllPanelState
           SliverToBoxAdapter(
             child: Divider(
               height: 14,
-              color: colorScheme.outline.withValues(alpha: 0.1),
+              color: colorScheme.outline,
             ),
           ),
         ],
@@ -76,7 +76,7 @@ class _SearchAllPanelState
           SliverToBoxAdapter(
             child: Divider(
               height: 14,
-              color: colorScheme.outline.withValues(alpha: 0.1),
+              color: colorScheme.outline,
             ),
           ),
         ],

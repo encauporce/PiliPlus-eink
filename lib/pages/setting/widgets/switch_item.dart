@@ -120,7 +120,7 @@ class _SetSwitchItemState extends State<SetSwitchItem> {
             height: 25,
             child: VerticalDivider(
               width: 1,
-              color: theme.colorScheme.outline.withValues(alpha: .3),
+              color: theme.colorScheme.outline,
             ),
           ),
           Padding(

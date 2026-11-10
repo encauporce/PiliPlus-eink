@@ -173,7 +173,7 @@ class _FavPanelState extends State<FavPanel> {
         Expanded(child: _buildBody),
         Divider(
           height: 1,
-          color: colorScheme.outline.withValues(alpha: 0.1),
+          color: colorScheme.outline,
         ),
         Padding(
           padding: .only(

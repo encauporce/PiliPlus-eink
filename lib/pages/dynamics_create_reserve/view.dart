@@ -43,7 +43,7 @@ class _CreateReservePageState extends State<CreateReservePage> {
       const SizedBox(height: 10),
       Divider(
         height: 1,
-        color: theme.colorScheme.outline.withValues(alpha: 0.1),
+        color: theme.colorScheme.outline,
       ),
       const SizedBox(height: 10),
     ];

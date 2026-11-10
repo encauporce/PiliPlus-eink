@@ -388,7 +388,7 @@ class _ReportCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: colorScheme.surface,
             borderRadius: const .all(.circular(8)),
-            border: .all(color: colorScheme.outline.withValues(alpha: 0.5)),
+            border: .all(color: colorScheme.outline),
           ),
           child: SelectionText(
             report.item.error.toString(),
@@ -415,7 +415,7 @@ class _ReportCard extends StatelessWidget {
             decoration: BoxDecoration(
               color: colorScheme.surface,
               borderRadius: const .all(.circular(8)),
-              border: .all(color: colorScheme.outline.withValues(alpha: 0.5)),
+              border: .all(color: colorScheme.outline),
             ),
             child: SelectionText.rich(
               TextSpan(

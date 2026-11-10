@@ -159,7 +159,7 @@ class _WhisperSettingsPageState extends State<WhisperSettingsPage> {
       case Success<PbMap<int, Setting>>(:final response):
         final divider = Divider(
           height: 1,
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          color: theme.colorScheme.outline,
         );
         return Builder(
           builder: (context) {

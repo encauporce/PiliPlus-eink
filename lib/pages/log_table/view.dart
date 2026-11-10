@@ -45,7 +45,7 @@ class _LogPageState<T> extends State<LogPage<T>> {
             ? Builder(
                 builder: (context) {
                   final colorScheme = ColorScheme.of(context);
-                  final outline = colorScheme.outline.withValues(alpha: 0.1);
+                  final outline = colorScheme.outline;
                   final divider = Divider(height: 1, color: outline);
                   final sliverDivider = SliverToBoxAdapter(child: divider);
                   final dividerV = VerticalDivider(width: 1, color: outline);

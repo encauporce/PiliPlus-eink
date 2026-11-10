@@ -70,7 +70,7 @@ class _LikeDetailPageState extends State<LikeDetailPage> {
           indent: 72,
           endIndent: 20,
           height: 6,
-          color: Colors.grey.withValues(alpha: 0.1),
+          color: Colors.black,
         );
         return SliverMainAxisGroup(
           slivers: [
@@ -79,7 +79,7 @@ class _LikeDetailPageState extends State<LikeDetailPage> {
               SliverToBoxAdapter(
                 child: Divider(
                   height: 1,
-                  color: Colors.grey.withValues(alpha: 0.1),
+                  color: Colors.black,
                 ),
               ),
             ],

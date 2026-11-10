@@ -196,11 +196,11 @@ class _FontSettingPageState extends State<FontSettingPage> {
             isPortrait
                 ? Divider(
                     height: 1,
-                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    color: colorScheme.primary,
                   )
                 : VerticalDivider(
                     width: 1,
-                    color: colorScheme.primary.withValues(alpha: 0.3),
+                    color: colorScheme.primary,
                   ),
             Expanded(
               child: Column(
@@ -390,7 +390,7 @@ class _FontSettingPageState extends State<FontSettingPage> {
       padding: const .symmetric(horizontal: 16, vertical: 5),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(color: colorScheme.primary.withValues(alpha: 0.3)),
+          top: BorderSide(color: colorScheme.primary),
         ),
       ),
       child: child,

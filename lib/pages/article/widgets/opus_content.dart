@@ -346,7 +346,7 @@ class OpusContent extends StatelessWidget {
                     border: Border(
                       left: BorderSide(
                         color: colorScheme.outlineVariant,
-                        width: 4,
+                        width: 1,
                       ),
                     ),
                     borderRadius: const .all(Radius.circular(6)),
