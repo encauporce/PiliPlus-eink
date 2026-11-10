@@ -111,12 +111,19 @@ class _HomePageState extends CommonPageState<HomePage>
         return Obx(
           () {
             final offset = barOffset.value;
-            return CustomHeightWidget(
-              offset: Offset(0, -offset),
-              height: Style.topBarHeight - offset,
-              child: Padding(
-                padding: padding,
-                child: child,
+            // 必须自己套 ClipRect：CustomHeightWidget 只改自身尺寸 + 平移绘制，
+            // 不裁剪 child。顶栏收起时 52dp 高的搜索框被整体上移到盒子外面，
+            // 越界部分会画到状态栏的 padding 区域上 —— 看起来就是
+            // 「顶栏收起了，但搜索框的黑色圆角边框还横在屏幕顶上」。
+            // dynamic_sliver_app_bar 里同样的用法一直是包了 ClipRect 的。
+            return ClipRect(
+              child: CustomHeightWidget(
+                offset: Offset(0, -offset),
+                height: Style.topBarHeight - offset,
+                child: Padding(
+                  padding: padding,
+                  child: child,
+                ),
               ),
             );
           },
