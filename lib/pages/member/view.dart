@@ -152,9 +152,7 @@ class _MemberPageState extends State<MemberPage> {
                               controller: _userController.tabController,
                               tabs: _userController.tabs,
                               onTap: _userController.onTapTab,
-                              dividerColor: theme.outline.withValues(
-                                alpha: 0.2,
-                              ),
+                              dividerColor: theme.outline,
                             ),
                           ),
                         Expanded(child: _buildBody),

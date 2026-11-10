@@ -297,7 +297,7 @@ class _DynamicDetailPageState extends CommonDynPageMultiState<DynamicDetailPage>
         tabAlignment: .start,
         controller: tabController,
         labelPadding: const .symmetric(horizontal: 12),
-        dividerColor: theme.colorScheme.outline.withValues(alpha: 0.1),
+        dividerColor: theme.colorScheme.outline,
         onTap: (value) {
           if (!tabController.indexIsChanging) {
             final positions = PrimaryScrollController.of(context).positions;

@@ -366,7 +366,7 @@ class _EpisodePanelState extends State<EpisodePanel>
             controller: _tabController,
             padding: const .only(right: 60),
             tabs: _sections.map((e) => Tab(text: e.title)).toList(),
-            dividerColor: colorScheme.outline.withValues(alpha: 0.1),
+            dividerColor: colorScheme.outline,
           ),
         Expanded(child: enableSlide ? slideList() : buildList()),
       ],
