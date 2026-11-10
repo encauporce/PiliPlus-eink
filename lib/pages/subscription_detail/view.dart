@@ -162,7 +162,7 @@ class _SubDetailPageState extends State<SubDetailPage>
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
-                color: theme.dividerColor.withValues(alpha: 0.2),
+                color: theme.colorScheme.outline,
               ),
             ),
           ),

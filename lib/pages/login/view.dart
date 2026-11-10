@@ -372,7 +372,7 @@ class _LoginPageState extends State<LoginPage> {
           child: DecoratedBox(
             decoration: UnderlineTabIndicator(
               borderSide: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                color: theme.colorScheme.outline,
               ),
             ),
             child: Row(
@@ -452,7 +452,7 @@ class _LoginPageState extends State<LoginPage> {
           child: DecoratedBox(
             decoration: UnderlineTabIndicator(
               borderSide: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                color: theme.colorScheme.outline,
               ),
             ),
             child: Row(

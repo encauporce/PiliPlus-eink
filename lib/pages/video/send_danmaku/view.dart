@@ -163,7 +163,7 @@ class _SendDanmakuPanelState extends CommonTextPubPageState<SendDanmakuPanel> {
     decoration: BoxDecoration(
       border: Border(
         top: BorderSide(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          color: theme.colorScheme.outline,
         ),
       ),
     ),

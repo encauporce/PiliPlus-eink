@@ -65,7 +65,7 @@ class _NoteListPageState extends State<NoteListPage>
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                    color: theme.colorScheme.outline,
                   ),
                 ),
               ),
@@ -141,8 +141,8 @@ class _NoteListPageState extends State<NoteListPage>
             color: theme.hoverColor,
             border: Border(
               top: BorderSide(
-                width: 0.5,
-                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                width: 1.0,
+                color: theme.colorScheme.outline,
               ),
             ),
           ),
@@ -180,7 +180,7 @@ class _NoteListPageState extends State<NoteListPage>
         if (response != null && response.isNotEmpty) {
           final divider = Divider(
             height: 1,
-            color: theme.colorScheme.outline.withValues(alpha: 0.1),
+            color: theme.colorScheme.outline,
           );
           return SliverList.separated(
             itemBuilder: (context, index) {

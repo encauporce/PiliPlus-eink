@@ -643,7 +643,7 @@ class AuthorPanel extends StatelessWidget {
                   },
                   minLeadingWidth: 0,
                 ),
-              const Divider(thickness: 0.1, height: 1),
+              const Divider(thickness: 1, height: 1),
               ListTile(
                 onTap: Get.back,
                 minLeadingWidth: 0,

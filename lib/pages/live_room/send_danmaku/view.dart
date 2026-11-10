@@ -65,7 +65,7 @@ class _ReplyPageState extends CommonRichTextPubPageState<LiveSendDmPanel> {
     decoration: BoxDecoration(
       border: Border(
         top: BorderSide(
-          color: theme.colorScheme.outline.withValues(alpha: 0.1),
+          color: theme.colorScheme.outline,
         ),
       ),
     ),

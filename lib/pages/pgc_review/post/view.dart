@@ -76,7 +76,7 @@ class _PgcReviewPostPanelState extends State<PgcReviewPostPanel> {
             ],
             shape: Border(
               bottom: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                color: theme.colorScheme.outline,
               ),
             ),
           ),
@@ -194,7 +194,7 @@ class _PgcReviewPostPanelState extends State<PgcReviewPostPanel> {
               border: Border(
                 top: BorderSide(
                   width: 0.5,
-                  color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                  color: theme.colorScheme.outline,
                 ),
               ),
             ),

@@ -370,7 +370,7 @@ class _MainAppState extends PopScopeState<MainApp>
         decoration: BoxDecoration(
           border: Border(
             right: BorderSide(
-              color: _colorScheme.outline.withValues(alpha: 0.06),
+              color: _colorScheme.outline,
             ),
           ),
         ),

@@ -260,7 +260,7 @@ class _DynTopicPageState extends State<DynTopicPage>
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                         width: 1,
-                        color: colorScheme.outline.withValues(alpha: 0.2),
+                        color: colorScheme.outline,
                       ),
                       foregroundColor: _controller.isLike.value
                           ? null
@@ -287,7 +287,7 @@ class _DynTopicPageState extends State<DynTopicPage>
                     style: OutlinedButton.styleFrom(
                       side: BorderSide(
                         width: 1,
-                        color: colorScheme.outline.withValues(alpha: 0.2),
+                        color: colorScheme.outline,
                       ),
                       foregroundColor: _controller.isFav.value
                           ? null

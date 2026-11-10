@@ -154,7 +154,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
                       border: Border(
                         bottom: BorderSide(
                           width: 1,
-                          color: theme.dividerColor.withValues(alpha: 0.1),
+                          color: theme.colorScheme.outline,
                         ),
                       ),
                     ),
@@ -232,7 +232,7 @@ class _VideoReplyReplyPanelState extends State<VideoReplyReplyPanel>
         SliverToBoxAdapter(
           child: Divider(
             height: 20,
-            color: theme.dividerColor.withValues(alpha: 0.1),
+            color: theme.colorScheme.outline,
             thickness: 6,
           ),
         ),

@@ -48,7 +48,7 @@ class CollectionSection extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: outline.withValues(alpha: 0.1),
+                      color: outline,
                     ),
                   ),
                 ),
@@ -78,7 +78,7 @@ class CollectionSection extends StatelessWidget {
             child: Divider(
               height: 24,
               thickness: 1,
-              color: outline.withValues(alpha: 0.1),
+              color: outline,
             ),
           );
         }

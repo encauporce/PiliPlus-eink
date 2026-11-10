@@ -205,7 +205,7 @@ class _MainReplyPageState extends State<MainReplyPage>
           title: const Text('评论详情'),
           shape: Border(
             bottom: BorderSide(
-              color: colorScheme.outline.withValues(alpha: 0.1),
+              color: colorScheme.outline,
             ),
           ),
         ),

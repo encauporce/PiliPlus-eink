@@ -296,7 +296,7 @@ mixin CommonDynPageMixin<T extends StatefulWidget>
             title: const Text('评论详情'),
             shape: Border(
               bottom: BorderSide(
-                color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                color: theme.colorScheme.outline,
               ),
             ),
           ),

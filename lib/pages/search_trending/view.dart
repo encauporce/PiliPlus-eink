@@ -111,9 +111,7 @@ class _SearchTrendingPageState extends State<SearchTrendingPage> {
                   shape: scrollRatio == 1
                       ? Border(
                           bottom: BorderSide(
-                            color: theme.colorScheme.outline.withValues(
-                              alpha: 0.1,
-                            ),
+                            color: theme.colorScheme.outline,
                           ),
                         )
                       : null,

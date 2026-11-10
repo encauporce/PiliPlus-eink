@@ -486,7 +486,7 @@ class UserInfoCard extends StatelessWidget {
                 side: WidgetStatePropertyAll(
                   BorderSide(
                     width: 1.0,
-                    color: colorScheme.outline.withValues(alpha: 0.3),
+                    color: colorScheme.outline,
                   ),
                 ),
                 padding: const WidgetStatePropertyAll(.zero),

@@ -1562,7 +1562,7 @@ class HeaderControlState extends State<HeaderControl>
               decoration: BoxDecoration(
                 border: Border(
                   bottom: BorderSide(
-                    color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                    color: theme.colorScheme.outline,
                   ),
                 ),
               ),
