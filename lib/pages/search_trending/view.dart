@@ -108,13 +108,15 @@ class _SearchTrendingPageState extends State<SearchTrendingPage> {
                           statusBarBrightness: Brightness.dark,
                           statusBarIconBrightness: Brightness.light,
                         ),
+                  // 注意：传 null 会回落到 appBarTheme 里那条常驻黑边，
+                  // 顶栏透明时边框却还在，所以未到底时必须显式给空 Border。
                   shape: scrollRatio == 1
                       ? Border(
                           bottom: BorderSide(
                             color: theme.colorScheme.outline,
                           ),
                         )
-                      : null,
+                      : const Border(),
                 );
               },
             ),
